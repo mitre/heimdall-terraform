@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-2_Guardduty_Enabled_Centralized",
+    "Description": "Checks whether GuardDuty is enabled. You can optionally verify that the results are centralized in a specific AWS Account.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceIdentifier": "GUARDDUTY_ENABLED_CENTRALIZED"
+  },
+  "Tags": "[]"
+}

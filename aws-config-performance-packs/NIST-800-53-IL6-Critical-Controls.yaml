@@ -22,36 +22,18 @@ Resources:
     ConfigRuleName: iam-password-policy
     ConfigRuleName: access-keys-rotated
     ConfigRuleName: iam-user-unused-credentials-check
-    ConfigRuleName: securityhub-enabled
     ConfigRuleName: guardduty-enabled-centralized
-    ConfigRuleName: iam-user-unused-credentials-check
     ConfigRuleName: securityhub-enabled
-    ConfigRuleName: guardduty-enabled-centralized
     ConfigRuleName: cloud-trail-cloud-watch-logs-enabled
     ConfigRuleName: cloudtrail-enabled
     ConfigRuleName: multi-region-cloudtrail-enabled
     ConfigRuleName: rds-logging-enabled
     ConfigRuleName: cloudwatch-alarm-action-check
     ConfigRuleName: redshift-cluster-configuration-check
-    ConfigRuleName: securityhub-enabled
-    ConfigRuleName: guardduty-enabled-centralized
-    ConfigRuleName: iam-user-unused-credentials-check
-    ConfigRuleName: iam-password-policy
     ConfigRuleName: iam-root-access-key-check
-    ConfigRuleName: redshift-cluster-configuration-check
     ConfigRuleName: s3-bucket-logging-enabled
-    ConfigRuleName: cloudtrail-enabled
     ConfigRuleName: cloudtrail-s3-dataevents-enabled
-    ConfigRuleName: securityhub-enabled
-    ConfigRuleName: guardduty-enabled-centralized
-    ConfigRuleName: rds-logging-enabled
-    ConfigRuleName: cloud-trail-cloud-watch-logs-enabled
-    ConfigRuleName: root-account-mfa-enabled
-    ConfigRuleName: secretsmanager-scheduled-rotation-success-check
-    ConfigRuleName: iam-user-group-membership-check
-    ConfigRuleName: iam-password-policy
-    ConfigRuleName: access-keys-rotated
-    ConfigRuleName: iam-root-access-key-check
+    ConfigRuleName: root-account-mfa-enabled # Not present in managed rules!
     ConfigRuleName: emr-kerberos-enabled
     ConfigRuleName: iam-group-has-users-check
     ConfigRuleName: iam-policy-no-statements-with-admin-access

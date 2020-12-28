@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-2_Cloudwatch_Alarm_Action_Check",
+    "Description": "AC-2_Cloudwatch_Alarm_Action_Check",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{ \"alarmActionRequired\": \"true\",\"insufficientDataActionRequired\": \"true\",\"okActionRequired\": \"false\" }",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::CloudWatch::Alarm",
+    "SourceIdentifier": "CLOUDWATCH_ALARM_ACTION_CHECK"
+  },
+  "Tags": "[]"
+}
