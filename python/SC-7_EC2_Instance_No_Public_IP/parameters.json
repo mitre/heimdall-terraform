@@ -1,0 +1,11 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "SC-7_EC2_Instance_No_Public_IP",
+    "SourceRuntime": "python3.6",
+    "CodeKey": "EC2_INSTANCE_NO_PUBLIC_IP.zip",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::EC2::Instance"
+  }
+}
