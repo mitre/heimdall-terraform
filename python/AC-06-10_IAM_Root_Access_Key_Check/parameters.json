@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-06-10_IAM_Root_Access_Key_Check",
+    "Description": "Checks whether the root user access key is available. The rule is compliant if the user access key does not exist.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceIdentifier": "IAM_ROOT_ACCESS_KEY_CHECK"
+  },
+  "Tags": "[]"
+}
