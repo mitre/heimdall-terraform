@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-3_IAM_User_Unused_Credentials_Check",
+    "Description": "Checks whether your AWS Identity and Access Management (IAM) users have passwords or active access keys that have not been used within the specified number of days you provided.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{ \"maxCredentialUsageAge\": \"90\" }",
+    "OptionalParameters": "{}",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceIdentifier": "IAM_USER_UNUSED_CREDENTIALS_CHECK"
+  },
+  "Tags": "[]"
+}

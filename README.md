@@ -10,9 +10,9 @@
 cd python
 rdk create <custom rule name> --source-identifier <rule source identifier> ...<additional args>...
 
-rdk create AC-2_EMR_Kerberos_Enabled --source-identifier EMR_KERBEROS_ENABLED --maximum-frequency TwentyFour_Hours 
+rdk create AC-3_Sagemaker_Notebook_No_Direct_Internet_Access --source-identifier SAGEMAKER_NOTEBOOK_NO_DIRECT_INTERNET_ACCESS --maximum-frequency TwentyFour_Hours 
 
-rdk create AC-2_IAM_User_No_Policies_Check --source-identifier IAM_USER_NO_POLICIES_CHECK --resource-types AWS::IAM::User
+rdk create AC-3_IAM_Policy_No_Statements_With_Admin_Access --source-identifier IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS --resource-types AWS::IAM::Policy
 ```
 
 Config rule names have the following constraints if created through RDK:

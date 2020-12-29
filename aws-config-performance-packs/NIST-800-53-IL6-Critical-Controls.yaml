@@ -33,7 +33,7 @@ Resources:
     ConfigRuleName: iam-root-access-key-check
     ConfigRuleName: s3-bucket-logging-enabled
     ConfigRuleName: cloudtrail-s3-dataevents-enabled
-    ConfigRuleName: root-account-mfa-enabled # Not present in managed rules!
+    ConfigRuleName: root-account-mfa-enabled # Not present in managed rules! see iam-user-mfa-enabled
     ConfigRuleName: emr-kerberos-enabled
     ConfigRuleName: iam-group-has-users-check
     ConfigRuleName: iam-policy-no-statements-with-admin-access
@@ -49,7 +49,6 @@ Resources:
     ConfigRuleName: redshift-cluster-public-access-check
     ConfigRuleName: s3-bucket-policy-grantee-check
     ConfigRuleName: iam-user-group-membership-check
-    ConfigRuleName: s3-bucket-public-read-prohibited
     ConfigRuleName: s3-account-level-public-access-blocks
     ConfigRuleName: iam-root-access-key-check
     ConfigRuleName: dms-replication-not-public

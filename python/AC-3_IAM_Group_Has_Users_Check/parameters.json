@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-3_IAM_Group_Has_Users_Check",
+    "Description": "Checks whether IAM groups have at least one IAM user.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::IAM::Group",
+    "SourceIdentifier": "IAM_GROUP_HAS_USERS_CHECK"
+  },
+  "Tags": "[]"
+}

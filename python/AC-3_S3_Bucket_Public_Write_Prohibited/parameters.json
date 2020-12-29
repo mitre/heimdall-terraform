@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-3_S3_Bucket_Public_Write_Prohibited",
+    "Description": "Checks that your Amazon S3 buckets do not allow public write access. The rule checks the Block Public Access settings, the bucket policy, and the bucket access control list (ACL).",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::S3::Bucket",
+    "SourceIdentifier": "S3_BUCKET_PUBLIC_WRITE_PROHIBITED"
+  },
+  "Tags": "[]"
+}
