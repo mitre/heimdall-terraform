@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-17_02_Redshift_Require_TLS_SSL",
+    "Description": "Checks whether Amazon Redshift clusters require TLS/SSL encryption to connect to SQL clients. The rule is NON_COMPLIANT if any Amazon Redshift cluster has parameter require_SSL not set to true.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::Redshift::Cluster",
+    "SourceIdentifier": "REDSHIFT_REQUIRE_TLS_SSL"
+  },
+  "Tags": "[]"
+}

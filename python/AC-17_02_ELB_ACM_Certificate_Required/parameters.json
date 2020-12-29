@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-17_02_ELB_ACM_Certificate_Required",
+    "Description": "This rule checks whether the Elastic Load Balancer(s) uses SSL certificates provided by AWS Certificate Manager. You must use an SSL or HTTPS listener with your Elastic Load Balancer to use this rule.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::ElasticLoadBalancing::LoadBalancer",
+    "SourceIdentifier": "ELB_ACM_CERTIFICATE_REQUIRED"
+  },
+  "Tags": "[]"
+}
