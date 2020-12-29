@@ -1,7 +1,7 @@
 {
   "Version": "1.0",
   "Parameters": {
-    "RuleName": "AC-17_02_ELB_TLS_HTTPS_Listeners_Only",
+    "RuleName": "AC-17-02_ELB_TLS_HTTPS_Listeners_Only",
     "Description": "Checks whether your Classic Load Balancer's listeners are configured with SSL or HTTPS",
     "SourceRuntime": null,
     "CodeKey": null,

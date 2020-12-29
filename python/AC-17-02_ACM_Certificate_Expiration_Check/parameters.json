@@ -1,7 +1,7 @@
 {
   "Version": "1.0",
   "Parameters": {
-    "RuleName": "AC-17_02_ACM_Certificate_Expiration_Check",
+    "RuleName": "AC-17-02_ACM_Certificate_Expiration_Check",
     "Description": "Checks whether ACM Certificates in your account are marked for expiration within the specified number of days. Certificates provided by ACM are automatically renewed. ACM does not automatically renew certificates that you import.",
     "SourceRuntime": null,
     "CodeKey": null,
