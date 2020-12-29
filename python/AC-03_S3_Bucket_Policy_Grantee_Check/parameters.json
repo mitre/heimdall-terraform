@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-03_S3_Bucket_Policy_Grantee_Check",
+    "Description": "Checks that the access granted by the Amazon S3 bucket is restricted to any of the AWS principals, federated users, service principals, IP addresses, or VPCs that you provide. The rule is COMPLIANT if a bucket policy is not present.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::S3::Bucket",
+    "SourceIdentifier": "S3_BUCKET_POLICY_GRANTEE_CHECK"
+  },
+  "Tags": "[]"
+}

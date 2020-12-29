@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-03_Redshift_Cluster_Public_Access_Check",
+    "Description": "Checks whether Amazon Redshift clusters are not publicly accessible. The rule is NON_COMPLIANT if the publicly accessible field is true in the cluster configuration item.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::Redshift::Cluster",
+    "SourceIdentifier": "REDSHIFT_CLUSTER_PUBLIC_ACCESS_CHECK"
+  },
+  "Tags": "[]"
+}

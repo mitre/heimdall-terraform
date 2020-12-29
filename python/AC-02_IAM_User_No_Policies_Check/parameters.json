@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-02_IAM_User_No_Policies_Check",
+    "Description": "Checks that none of your IAM users have policies attached. IAM users must inherit permissions from IAM groups or roles.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::IAM::User",
+    "SourceIdentifier": "IAM_USER_NO_POLICIES_CHECK"
+  },
+  "Tags": "[]"
+}

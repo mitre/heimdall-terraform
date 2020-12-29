@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-02_Multi_Region_Cloudtrail_Enabled",
+    "Description": "Checks that there is at least one multi-region AWS CloudTrail. The rule is non-compliant if the trails do not match input parameters",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceIdentifier": "MULTI_REGION_CLOUD_TRAIL_ENABLED"
+  },
+  "Tags": "[]"
+}

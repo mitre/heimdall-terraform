@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "AC-02_RDS_Logging_Enabled",
+    "Description": "Checks that respective logs of Amazon Relational Database Service (Amazon RDS) are enabled. The rule is NON_COMPLIANT if any log types are not enabled.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::RDS::DBInstance",
+    "SourceIdentifier": "MULTI_REGION_CLOUD_TRAIL_ENABLED"
+  },
+  "Tags": "[]"
+}
