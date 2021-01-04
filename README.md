@@ -10,9 +10,9 @@
 cd python
 rdk create <custom rule name> --source-identifier <rule source identifier> ...<additional args>...
 
-rdk create AC-3_Sagemaker_Notebook_No_Direct_Internet_Access --source-identifier SAGEMAKER_NOTEBOOK_NO_DIRECT_INTERNET_ACCESS --maximum-frequency TwentyFour_Hours 
+rdk create CM-08-03_Cloudwatch_Log_Group_Encrypted --source-identifier CLOUDWATCH_LOG_GROUP_ENCRYPTED --maximum-frequency TwentyFour_Hours 
 
-rdk create AC-3_IAM_Policy_No_Statements_With_Admin_Access --source-identifier IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS --resource-types AWS::IAM::Policy
+rdk create CM-08-03_EC2_Managedinstance_Patch_Compliance_Status_Check --source-identifier EC2_MANAGEDINSTANCE_PATCH_COMPLIANCE_STATUS_CHECK --resource-types AWS::SSM::PatchCompliance
 ```
 
 Config rule names have the following constraints if created through RDK:
@@ -29,6 +29,13 @@ Config rule names have the following constraints if created through the AWS cons
 __run all tests__: `./run-all-tests.sh`
 
 __deploy all rules in repo__: `./deploy-all-rules.sh`
+
+
+## Limitations
+
+- Python RDK need to be updated to be consistent with AWS console rules. We made changes to our local RDK source files to temporarily fix the issues.
+- conformance packs are not currently available in US-Gov-West region
+- Rules in AWS console cannot be sorted by rule name
 
 
 ## Useful Links

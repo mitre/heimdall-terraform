@@ -105,7 +105,7 @@ Resources:
   # AU-9
   # https://nvd.nist.gov/800-53/Rev4/control/AU-9
     ConfigRuleName: cloud-trail-encryption-enabled
-    ConfigRuleName: loudwatch-log-group-encrypted
+    ConfigRuleName: cloudwatch-log-group-encrypted
 
   # AU-10
   # https://nvd.nist.gov/800-53/Rev4/control/AU-10
