@@ -8,7 +8,37 @@
     "InputParameters": "{}",
     "OptionalParameters": "{}",
     "SourceEvents": "AWS::S3::Bucket",
-    "SourceIdentifier": "S3_BUCKET_PUBLIC_WRITE_PROHIBITED"
+    "SourceIdentifier": "S3_BUCKET_PUBLIC_WRITE_PROHIBITED",
+    "Remediation": {
+      "Automatic": true,
+      "ConfigRuleName": "AC-03_S3_Bucket_Public_Write_Prohibited",
+      "MaximumAutomaticAttempts": "10",
+      "RetryAttemptSeconds": "600",
+      "Parameters": {
+        "AutomationAssumeRole": {
+          "StaticValue": {
+            "Values": [  
+              { "Fn::Sub": "arn:aws-us-gov:iam::${AWS::AccountId}:role/Config_Remediation_Role-S3_Bucket_Public_Write_Prohibited" }
+            ]
+          }
+        },
+        "S3BucketName": {
+            "ResourceValue": {
+              "Value": "RESOURCE_ID"
+            }
+          }
+      },
+      "ExecutionControls": {
+        "SsmControls": {
+          "ConcurrentExecutionRatePercentage": "10",
+          "ErrorPercentage": "10"
+        }
+      },
+      "ResourceType": "AWS::S3::Bucket",
+      "TargetId": "AWS-DisableS3BucketPublicReadWrite",
+      "TargetType": "SSM_DOCUMENT",
+      "TargetVersion": "1"
+    }
   },
   "Tags": "[]"
 }

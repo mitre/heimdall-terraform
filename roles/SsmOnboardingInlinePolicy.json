@@ -1,0 +1,19 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateInstanceProfile",
+                "iam:ListInstanceProfilesForRole",
+                "iam:PassRole",
+                "ec2:DescribeIamInstanceProfileAssociations",
+                "iam:GetInstanceProfile",
+                "ec2:DisassociateIamInstanceProfile",
+                "ec2:AssociateIamInstanceProfile",
+                "iam:AddRoleToInstanceProfile"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
