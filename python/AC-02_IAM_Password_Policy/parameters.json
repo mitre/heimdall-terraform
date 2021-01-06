@@ -5,10 +5,69 @@
     "Description": "Checks whether the account password policy for IAM users meets the specified requirements indicated in the parameters. This rule is NON_COMPLIANT if the account password policy does not meet the specified requirements.",
     "SourceRuntime": null,
     "CodeKey": null,
-    "InputParameters": "{ \"RequireUppercaseCharacters\": \"true\", \"RequireLowercaseCharacters\": \"true\", \"RequireSymbols\": \"true\", \"RequireNumbers\": \"true\", \"MinimumPasswordLength\": \"14\", \"PasswordReusePrevention\": \"24\", \"MaxPasswordAge\": \"90\" }",
+    "InputParameters": "{ \"RequireUppercaseCharacters\": \"true\", \"RequireLowercaseCharacters\": \"true\", \"RequireSymbols\": \"true\", \"RequireNumbers\": \"true\", \"MinimumPasswordLength\": \"10\", \"PasswordReusePrevention\": \"24\", \"MaxPasswordAge\": \"90\" }",
     "OptionalParameters": "{}",
     "SourcePeriodic": "TwentyFour_Hours",
-    "SourceIdentifier": "IAM_PASSWORD_POLICY"
+    "SourceIdentifier": "IAM_PASSWORD_POLICY",
+    "Remediation": {
+      "Automatic": true,
+      "ConfigRuleName": "AC-02_IAM_Password_Policy",
+      "MaximumAutomaticAttempts": "10",
+      "RetryAttemptSeconds": "600",
+      "Parameters": {
+        "AutomationAssumeRole": {
+          "StaticValue": {
+            "Values": [  
+              { "Fn::Sub": "arn:aws-us-gov:iam::${AWS::AccountId}:role/Config_Remediation_Role-IAM_Password_Policy" }
+            ]
+          }
+        },
+        "RequireUppercaseCharacters": {
+          "StaticValue": {
+            "Values": ["true"]
+          }
+        },
+        "RequireLowercaseCharacters": {
+          "StaticValue": {
+            "Values": ["true"]
+          }
+        },
+        "RequireSymbols": {
+          "StaticValue": {
+            "Values": ["true"]
+          }
+        },
+        "RequireNumbers": {
+          "StaticValue": {
+            "Values": ["true"]
+          }
+        },
+        "MinimumPasswordLength": {
+          "StaticValue": {
+            "Values": ["10"]
+          }
+        },
+        "PasswordReusePrevention": {
+          "StaticValue": {
+            "Values": ["24"]
+          }
+        },
+        "MaxPasswordAge": {
+          "StaticValue": {
+            "Values": ["90"]
+          }
+        }
+      },
+      "ExecutionControls": {
+        "SsmControls": {
+          "ConcurrentExecutionRatePercentage": "10",
+          "ErrorPercentage": "10"
+        }
+      },
+      "TargetId": "SetPasswordPolicy",
+      "TargetType": "SSM_DOCUMENT",
+      "TargetVersion": "1"
+    }
   },
   "Tags": "[]"
 }

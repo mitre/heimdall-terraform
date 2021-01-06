@@ -23,10 +23,10 @@
           }
         },
         "S3BucketName": {
-            "ResourceValue": {
-              "Value": "RESOURCE_ID"
-            }
+          "ResourceValue": {
+            "Value": "RESOURCE_ID"
           }
+        }
       },
       "ExecutionControls": {
         "SsmControls": {

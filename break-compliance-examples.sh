@@ -12,3 +12,6 @@ aws configservice describe-remediation-execution-status \
                   --config-rule-name AC-03_S3_Bucket_Public_Write_Prohibited \
                   --region us-gov-west-1 
 
+aws configservice describe-remediation-execution-status \
+                  --config-rule-name AC-02_IAM_Password_Policy \
+                  --region us-gov-west-1 
