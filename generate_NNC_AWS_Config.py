@@ -48,6 +48,7 @@ def get_config_rule_data(parameters_path):
         get_formatted_control_id(control_name),
         get_control_family_expansion(control_name),
         get_control_description(control_name),
+        get_control_link(control_name),
         control_name,
         test_description,
         test_type,
@@ -136,6 +137,15 @@ def get_control_description(control_name):
             if is_desc or is_number:
                 description += e.text + ' '
     return description
+
+
+def get_control_link(control_name):
+    control_id = get_formatted_control_id(control_name)
+    match = re.match('^[A-Z]{2}-[0-9]{2}', control_name)
+    if match:
+        match = match.group(0)
+        return f'https://nvd.nist.gov/800-53/Rev4/control/{match[0:2]}-{str(int(match[3:5]))}'
+    return ''
 
 
 def get_formatted_control_id(control_name):
