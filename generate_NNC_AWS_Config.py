@@ -172,7 +172,9 @@ def export(data, md_filename='NNC-AWS-Confg.md', xlsx_filename='NNC-AWS-Confg.xl
 
 def main():
     data = []
-    for parameters_path in glob.glob('python/**/parameters.json'):
+    files = glob.glob('python/**/parameters.json')
+    files.sort()
+    for parameters_path in files:
         data.append(get_config_rule_data(parameters_path))
     export(data)
 
