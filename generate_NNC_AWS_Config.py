@@ -12,6 +12,7 @@ def headers():
         "Control ID",
         "Control Name",
         "Control Description",
+        "Control Link",
         "Test Name",
         "Test Description",
         "Test Type",
