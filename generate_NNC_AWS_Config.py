@@ -3,6 +3,7 @@ import json
 import glob
 from openpyxl import load_workbook
 import re
+import xml.etree.ElementTree as ET
 
 
 def headers():
@@ -36,7 +37,7 @@ def get_config_rule_data(parameters_path):
     parameters = file_json['Parameters'] if 'Tags' in file_json else {}
     tags = json.loads(file_json['Tags']) if 'Tags' in file_json else []
     control_name = parameters['RuleName'] if 'RuleName' in parameters else ''
-    control_description = parameters['Description'] if 'Description' in parameters else ''
+    test_description = parameters['Description'] if 'Description' in parameters else ''
     test_type = ''
     cloud_resource_category = '' 
     responsibility = ''
@@ -48,7 +49,7 @@ def get_config_rule_data(parameters_path):
         get_control_family_expansion(control_name),
         get_control_description(control_name),
         control_name,
-        control_description,
+        test_description,
         test_type,
         cloud_resource_category,
         responsibility,
@@ -123,7 +124,18 @@ def get_control_description(control_name):
 
     Returns: The control family description
     """
-    return ''
+    control_id = get_formatted_control_id(control_name)
+    tree = ET.parse('800-53-controls.xml')
+    root = tree.getroot()
+    description = ''
+    element = root.find('.//{http://scap.nist.gov/schema/sp800-53/2.0}number[.="' + control_id + '"]/../{http://scap.nist.gov/schema/sp800-53/2.0}statement')
+    if element:
+        for e in element.iter():
+            is_desc = e.tag == '{http://scap.nist.gov/schema/sp800-53/2.0}description'
+            is_number = e.tag == '{http://scap.nist.gov/schema/sp800-53/2.0}number'
+            if is_desc or is_number:
+                description += e.text + ' '
+    return description
 
 
 def get_formatted_control_id(control_name):
@@ -144,7 +156,7 @@ def get_formatted_control_id(control_name):
         match = match.group(0)
         if (len(match) == 5):
             return f'{match[0:2]}-{str(int(match[3:5]))}'
-        return f'{match[0:2]}-{str(int(match[3:5]))}({str(int(match[6:8]))})'
+        return f'{match[0:2]}-{str(int(match[3:5]))} ({str(int(match[6:8]))})'
     return ''
 
 
@@ -176,6 +188,7 @@ def main():
     files.sort()
     for parameters_path in files:
         data.append(get_config_rule_data(parameters_path))
+        # break
     export(data)
 
 
