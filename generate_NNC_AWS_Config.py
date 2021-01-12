@@ -34,16 +34,31 @@ def get_config_rule_data(parameters_path):
 
     Returns: Array of data that may be exported
     """
+    def find_tag(tags, key):
+        """
+        Finds a specific tag from the tags array and returns the value
+
+        Positional arguments:
+            tags -- The tags array from parameters.json
+            key -- The key name to search for
+
+        Returns: The tag value or "-"
+        """
+        for tag_dict in tags:
+            if tag_dict['Key'] == key:
+                return tag_dict['Value']
+        return "-"
     file_json = json.loads(open(parameters_path).read())
     parameters = file_json['Parameters'] if 'Tags' in file_json else {}
     tags = json.loads(file_json['Tags']) if 'Tags' in file_json else []
     control_name = parameters['RuleName'] if 'RuleName' in parameters else ''
     test_description = parameters['Description'] if 'Description' in parameters else ''
-    test_type = ''
-    cloud_resource_category = '' 
-    responsibility = ''
-    validation_steps = ''
-    usnorthcom_validated = ''
+    test_type = find_tag(tags, 'TestType')
+    cloud_resource = find_tag(tags, 'CloudResource')
+    category = find_tag(tags, 'Category')
+    responsibility = find_tag(tags, 'Responsibility')
+    validation_steps = find_tag(tags, 'ValidationSteps')
+    usnorthcom_validated = find_tag(tags, 'USNORTHCOMValidated')
     return [
         get_control_family(control_name),
         get_formatted_control_id(control_name),
@@ -53,11 +68,13 @@ def get_config_rule_data(parameters_path):
         control_name,
         test_description,
         test_type,
-        cloud_resource_category,
+        cloud_resource,
+        category,
         responsibility,
         validation_steps,
         usnorthcom_validated
     ]
+
 
 
 def get_control_family(control_name):
