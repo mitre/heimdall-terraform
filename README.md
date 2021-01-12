@@ -26,7 +26,7 @@ Config rules allow specifying the definitiion of compliance for specific types o
 
 ### IAM Roles
 
-IAM roles allow AWS to assume certain permissions when remediating a non-compliant config rule. The configuration for these roles can be found under the `roles` directory. All roles should have the `AssumeRoleTrustRelationship` trust policy, as well as both the `SsmOnboardingInlinePolicy` and `SSMQuickSetupEnableExplorerInlinePolicy` inline policies. On top of this, a role should have the MINIMUM permissions it needs to perform its specific remediation task. 
+IAM roles allow AWS to assume certain permissions when remediating a non-compliant config rule. The configuration for these roles can be found under the `roles` directory. All roles should have the `AssumeRoleTrustRelationship` trust policy, as well as both the `SsmOnboardingInlinePolicy` and `SSMQuickSetupEnableExplorerInlinePolicy` inline policies. On top of this, a role should have the MINIMUM permissions it needs to perform its specific remediation task. When specifying the remediation role in a `parameters.json` file, you must specify the region (i.e. no generics that can be assiumed like). The default aws prefix would be `arn:aws:iam::...` and the gov west prefix would be `arn:aws-us-gov:iam::...`.
 
 
 ### SSM Documents

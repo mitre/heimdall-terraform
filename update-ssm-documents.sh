@@ -5,9 +5,9 @@
 # ------------------- #
 
 latestDocVersion=$(aws ssm update-document \
-    --content file://ssm-remediation-documents/SetPasswordPolicy.json \
+    --content file://ssm-remediation-documents/SetPasswordPolicy.yaml \
     --name "SetPasswordPolicy" \
-    --document-format JSON \
+    --document-format YAML \
     --document-version '$LATEST' \
     | jq -r '.DocumentDescription.LatestVersion')
 aws ssm update-document-default-version \

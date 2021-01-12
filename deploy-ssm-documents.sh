@@ -4,6 +4,7 @@
 # AC-02               #
 # ------------------- #
 aws ssm create-document \
-    --content file://ssm-remediation-documents/SetPasswordPolicy.json \
+    --content file://ssm-remediation-documents/SetPasswordPolicy.yaml \
     --name "SetPasswordPolicy" \
-    --document-type "Command" 
+    --document-format YAML \
+    --document-type "Automation" 
