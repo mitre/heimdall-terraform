@@ -10,5 +10,5 @@
     "SourceEvents": "AWS::ElasticLoadBalancing::LoadBalancer",
     "SourceIdentifier": "ELB_ACM_CERTIFICATE_REQUIRED"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Elastic Load Blancer\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }

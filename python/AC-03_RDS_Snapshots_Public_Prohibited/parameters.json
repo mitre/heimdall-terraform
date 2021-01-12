@@ -10,5 +10,5 @@
     "SourceEvents": "AWS::RDS::DBSnapshot,AWS::RDS::DBClusterSnapshot",
     "SourceIdentifier": "RDS_SNAPSHOTS_PUBLIC_PROHIBITED"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"RDS\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }

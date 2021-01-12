@@ -10,5 +10,5 @@
     "SourceEvents": "AWS::IAM::User",
     "SourceIdentifier": "IAM_USER_GROUP_MEMBERSHIP_CHECK"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"IAM\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }

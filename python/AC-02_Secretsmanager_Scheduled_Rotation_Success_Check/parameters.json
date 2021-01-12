@@ -10,5 +10,5 @@
     "SourceEvents": "AWS::SecretsManager::Secret",
     "SourceIdentifier": "SECRETSMANAGER_SCHEDULED_ROTATION_SUCCESS_CHECK"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Secrets Manager\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }
