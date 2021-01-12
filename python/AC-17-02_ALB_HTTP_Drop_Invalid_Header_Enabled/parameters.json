@@ -10,5 +10,5 @@
     "SourceEvents": "AWS::ElasticLoadBalancingV2::LoadBalancer",
     "SourceIdentifier": "ALB_HTTP_DROP_INVALID_HEADER_ENABLED"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Application Load Balancer\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }

@@ -10,5 +10,5 @@
     "SourceEvents": "AWS::ElasticLoadBalancing::LoadBalancer",
     "SourceIdentifier": "ELB_TLS_HTTPS_LISTENERS_ONLY"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Elastic Load Balancer\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }

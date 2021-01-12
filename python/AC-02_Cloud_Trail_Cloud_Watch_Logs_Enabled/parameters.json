@@ -10,5 +10,5 @@
     "SourcePeriodic": "TwentyFour_Hours",
     "SourceIdentifier": "CLOUD_TRAIL_CLOUD_WATCH_LOGS_ENABLED"
   },
-  "Tags": "[]"
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"CloudTrail : CloudWatch\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
 }
