@@ -23,6 +23,22 @@ rdk create CM-08-03_EC2_Managedinstance_Patch_Compliance_Status_Check --source-i
 
 Config rules allow specifying the definitiion of compliance for specific types of AWS resources. AWS has many pre-made rules that may be used (see `AC-02_IAM_Password_Policy`), and also allows the creation of custom rules (see `SC-07_EC2_Instance_No_Public_IP`). The configuration of both types may be found under the `python` directory.
 
+#### Config Rule Tags
+The `generate_NNC_AWS_config.py` script that generates markdown and xlsx parses the tags assigned in rules' `parameters.json` files to populate a few columns. The blank tags property can be found below to be filled out inside a new rule.
+
+[Rules for AWS Config Tags](https://docs.aws.amazon.com/config/latest/developerguide/tagging.html)
+
+```json
+{
+    "Tags": "[{\"Key\": \"TestType\", \"Value\": \"\"}, {\"Key\": \"CloudResource\", \"Value\": \"\"}, {\"Key\": \"Category\", \"Value\": \"\"}, {\"Key\": \"Responsibility\", \"Value\": \"\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"\"}]"
+}
+
+// Common tags
+{
+    "Tags": "[{\"Key\": \"TestType\", \"Value\": \"\"}, {\"Key\": \"CloudResource\", \"Value\": \"\"}, {\"Key\": \"Category\", \"Value\": \"\"}, {\"Key\": \"Responsibility\", \"Value\": \"\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"\"}]"
+}
+```
+
 
 ### IAM Roles
 
@@ -46,13 +62,15 @@ __update all SSM documents for remediations__: `./update-ssm-documents.sh`
 
 __deploy all rules in repo__: `./deploy-rules.sh`
 
+__generate markdown and xlsx for implemented rules__: `python generate_NNC_AWS_config.py`
+
 
 ## Initial Deployment Steps
 
 ```bash
 ./deploy-roles.sh
 ./deploy-ssm-documents.sh
-./deploy-all-rules.sh
+./deploy-rules.sh
 ```
 
 
