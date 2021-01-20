@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "Restricted_Common_Ports",
+    "Description": "Checks whether security groups that are in use disallow unrestricted incoming TCP traffic to the specified ports.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{ \"blockedPort1\": \"20\", \"blockedPort2\": \"21\", \"blockedPort3\": \"3389\", \"blockedPort4\": \"3306\", \"blockedPort5\": \"4333\" }",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::EC2::SecurityGroup",
+    "SourceIdentifier": "RESTRICTED_INCOMING_TRAFFIC"
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"EC2\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
+}

@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "KMS_CMK_Not_Scheduled_For_Deletion",
+    "Description": "Checks whether customer master keys (CMKs) are not scheduled for deletion in AWS Key Management Service (KMS). The rule is NON_COMPLAINT if CMKs are scheduled for deletion.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceIdentifier": "KMS_CMK_NOT_SCHEDULED_FOR_DELETION"
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"KMS\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
+}

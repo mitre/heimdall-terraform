@@ -1,0 +1,273 @@
+
+ACM_Certificate_Expiration_Check:
+  - AC-17 (02)
+
+ALB_HTTP_Drop_Invalid_Header_Enabled:
+  - AC-17 (02)
+
+ALB_HTTP_To_HTTPS_Redirection_Check:
+  - AC-17 (02)
+
+Access_Keys_Rotated:
+  - AC-02
+  - AC-02 (01)
+
+Cloud_Trail_Cloud_Watch_Logs_Enabled:
+  - AU-06 (03)
+  - AC-02 (04)
+  - SI-04 (04)
+  - SI-04 (02)
+  - SI-04 (05)
+  - AU-03
+  - SI-04
+  - AU-12
+  - AC-02
+  - CA-07
+  - AU-06 (01)
+  - AU-07 (01)
+
+Cloud_Trail_Enabled:
+  - AC-02
+  - AU-12
+  - AC-02 (04)
+  - AU-03
+
+Cloud_Trail_Encryption_Enabled:
+  - AU-09
+
+Cloud_Trail_S3_Dataevents_Enabled:
+  - AC-02
+
+Cloudwatch_Alarm_Action_Check:
+  - AC-02
+
+Cloudwatch_Log_Group_Encrypted:
+  - AU-09
+
+CMK_Backing_Key_Rotation_Enabled:
+  - SC-12
+
+DMS_Replication_Not_Public:
+  - AC-03
+
+EBS_Snapshot_Public_Restorable_Check:
+  - AC-03
+
+EC2_Instances_In_VPC:
+  - AC-04
+  - SC-07
+  - SC-07 (03), 
+
+EC2_Instance_Detailed_Monitoring_Enabled:
+  - CA-07
+  - SI-04 (02)
+  - SI-04
+
+EC2_Instance_Managed_By_Systems_Manager:
+  - CM-08 (03)
+  - CM-07
+
+EC2_Instance_No_Public_IP:
+  - SC-07
+
+EC2_Managedinstance_Association_Compliance_Status_Check:
+  - CM-08 (03)
+  - CM-07
+
+EC2_Managedinstance_Patch_Compliance_Status_Check:
+  - CM-08 (03)
+
+Elasticsearch_In_VPC_Only:
+  - AC-04
+  - SC-07
+  - SC-07 (03)
+
+Elasticsearch_Node_To_Node_Encryption_Check:
+  - SC-07
+  - SC-08
+  - SC-08 (01)
+
+ELB_ACM_Certificate_Required:
+  - AC-17 (02)
+
+ELB_TLS_HTTPS_Listeners_Only:
+  - AC-17 (02)
+
+EMR_Kerberos_Enabled:
+  - AC-02
+  - AC-03
+
+EMR_Master_No_Public_IP:
+  - AC-04
+  - SC-07
+  - SC-07 (03)
+
+Guardduty_Enabled_Centralized:
+  - AC-02 (01)
+  - RA-05
+  - SI-04 (16)
+  - AC-17 (01)
+  - SI-04
+  - AU-06 (03)
+  - SI-04 (01)
+  - SA-10
+  - SI-04 (02)
+  - AC-02 (04)
+  - AC-02
+  - AC-02 (12)
+  - SI-04 (05)
+  - CA-07
+  - SI-04 (04)
+  - AU-06 (01)
+
+Guardduty_Non_Archived_Findings:
+  - IR-04 (1)
+  - IR-06 (1)
+  - IR-07 (1)
+  - RA-05
+  - SA-10
+  - SI-04
+
+IAM_Group_Has_Users_Check:
+  - AC-02
+  - AC-03
+
+IAM_Password_Policy:
+  - IA-02
+  - AC-02
+  - IA-05 (04)
+  - IA-05 (01)
+  - AC-02 (01)
+
+IAM_Policy_No_Statements_With_Admin_Access:
+  - AC-03
+  - AC-02
+
+IAM_Root_Access_Key_Check:
+  - AC-06 (10)
+  - AC-02
+  - AC-03
+
+IAM_User_Group_Membership_Check:
+  - AC-02 (01)
+  - AC-06
+  - AC-03
+  - AC-02
+
+IAM_User_No_Policies_Check:
+  - AC-03
+  - AC-02
+
+IAM_User_Unused_Credentials_Check:
+  - AC-02
+  - AC-02 (03)
+  - AC-03
+  - AC-02 (01)
+  - AC-06
+
+Internet_Gateway_Authorized_VPC_Only:
+  - AC-17 (03)
+
+KMS_CMK_Not_Scheduled_For_Deletion:
+  - SC-12
+  - SC-28
+
+Lambda_Inside_VPC:
+  - AC-04
+  - SC-07
+  - SC-07 (03)
+
+Lambda_Function_Public_Access_Prohibited:
+  - AC-03
+
+Multi_Region_Cloudtrail_Enabled:
+  - AC-02
+
+RDS_Instance_Public_Access_Check:
+  - AC-04
+  - AC-06
+  - AC-21
+  - SC-07
+  - SC-07 (03)
+
+RDS_Logging_Enabled:
+  - AC-02
+
+RDS_Snapshots_Public_Prohibited:
+  - AC-03
+
+Redshift_Cluster_Configuration_Check:
+  - AC-02
+
+Redshift_Cluster_Public_Access_Check:
+  - AC-03
+
+Redshift_Require_TLS_SSL:
+  - AC-17 (02)
+
+Restricted_Common_Ports:
+  - AC-04
+  - CM-02
+  - SC-07
+  - SC-07 (03)
+
+Restricted_SSH:
+  - AC-04
+  - SC-07
+  - SC-07 (03)
+
+S3_Account_Level_Public_Access_Blocks:
+  - AC-03
+
+S3_Bucket_Logging_Enabled:
+  - AC-02
+
+S3_Bucket_Policy_Grantee_Check:
+  - AC-03
+
+S3_Bucket_Public_Read_Prohibited:
+  - AC-03
+  - AC-04
+  - AC-06
+  - AC-21
+  - SC-07
+  - SC-07 (03)
+
+S3_Bucket_Public_Write_Prohibited:
+  - AC-03
+
+S3_Bucket_SSL_Requests_Only:
+  - AC-17 (02)
+
+Sagemaker_Notebook_No_Direct_Internet_Access:
+  - AC-03
+
+Secretsmanager_Scheduled_Rotation_Success_Check:
+  - AC-02
+  - AC-02 (01)
+
+Securityhub_Enabled:
+  - AU-06 (03)
+  - AC-02 (12)
+  - AU-06 (01)
+  - CA-07
+  - AC-02 (01)
+  - AC-02 (04)
+  - SI-04 (02)
+  - SA-10
+  - SI-04
+  - SI-04 (04)
+  - AC-17 (01)
+  - SI-04 (05)
+  - AC-02
+  - SI-04 (16)
+
+VPC_Default_Security_Group_Closed:
+- AC-04
+- SC-07
+- SC-07 (03)
+
+VPC_SG_Open_Only_To_Authorized_Ports:
+  - AC-04
+  - SC-07
+  - SC-07 (03)

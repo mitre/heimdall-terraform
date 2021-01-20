@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "IAM_Policy_No_Statements_With_Admin_Access",
+    "Description": "Checks whether the default version of AWS Identity and Access Management (IAM) policies do not have administrator access. If any statement has \"Effect\": \"Allow\" with \"Action\": \"*\" over \"Resource\": \"*\", the rule is non-compliant.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::IAM::Policy",
+    "SourceIdentifier": "IAM_POLICY_NO_STATEMENTS_WITH_ADMIN_ACCESS"
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"IAM\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
+}
