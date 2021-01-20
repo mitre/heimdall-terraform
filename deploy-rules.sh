@@ -1,7 +1,7 @@
-cd python
+cd rules
 rdk deploy -a
 
-# cd python 
+# cd rules 
 # for foldername in $(ls -d */) 
 # do 
 #     echo "\n\nDeploying $foldername"

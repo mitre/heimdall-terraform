@@ -1,0 +1,13 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "EC2_Instance_No_Public_IP",
+    "Description": "Checks whether Amazon EC2 instances have a public IP association or not. The rule is NON_COMPLIANT if the publicIp field is present in the Amazon EC2 instance configuration item. This rule applies only to IPv4.",
+    "SourceRuntime": "python3.6",
+    "CodeKey": "EC2_INSTANCE_NO_PUBLIC_IP.zip",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::EC2::Instance"
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"Open Source\"}, {\"Key\": \"CloudResource\", \"Value\": \"EC2\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
+}

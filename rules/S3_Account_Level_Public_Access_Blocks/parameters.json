@@ -1,0 +1,14 @@
+{
+  "Version": "1.0",
+  "Parameters": {
+    "RuleName": "S3_Account_Level_Public_Access_Blocks",
+    "Description": "Checks whether the required public access block settings are configured from account level. The rule is NON_COMPLIANT when the public access block settings are not configured from account level.",
+    "SourceRuntime": null,
+    "CodeKey": null,
+    "InputParameters": "{ \"IgnorePublicAcls\": \"true\", \"BlockPublicPolicy\": \"true\", \"BlockPublicAcls\": \"true\", \"RestrictPublicBuckets\": \"true\" }",
+    "OptionalParameters": "{}",
+    "SourceEvents": "AWS::S3::AccountPublicAccessBlock",
+    "SourceIdentifier": "S3_ACCOUNT_LEVEL_PUBLIC_ACCESS_BLOCKS"
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"S3\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]"
+}
