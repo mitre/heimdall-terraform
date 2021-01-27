@@ -47,25 +47,33 @@ SSM documents are used here to specify how non-compliant config rules should be 
 
 ## Useful Scripts
 
-__run all tests__: `./run-tests.sh`
+__run all tests__: `./script/run-tests.sh`
 
-__deploy all IAM roles for remediations__: `./deploy-roles.sh`
+__deploy all IAM roles for remediations__: `./script/deploy-roles.sh`
 
-__deploy all SSM documents for remediations__: `./deploy-ssm-documents.sh`
+__deploy all SSM documents for remediations__: `./script/deploy-ssm-documents.sh`
 
-__update all SSM documents for remediations__: `./update-ssm-documents.sh`
+__update all SSM documents for remediations__: `./script/update-ssm-documents.sh`
 
-__deploy all rules in repo__: `./deploy-rules.sh`
+__deploy all rules in repo__: `./script/deploy-rules.sh`
 
-__generate  xlsx for rule compliance__: `python generate_compliance_report.py`
+__generate xlsx for rule compliance__: `python generate_compliance_report.py`
+
+__build Config to HDF Pusher Lambda__: `./script/build-lambda.sh`
+
+__create Config to HDF Pusher Lambda__: `./script/create-lambda.sh`
+
+__deploy/update Config to HDF Pusher Lambda__: `./script/deploy-lambda.sh`
 
 
 ## Initial Deployment Steps
 
 ```bash
-./deploy-roles.sh
-./deploy-ssm-documents.sh
-./deploy-rules.sh
+./script/deploy-roles.sh
+./script/deploy-ssm-documents.sh
+./script/deploy-rules.sh
+./script/build-lambda.sh
+./script/create-lambda.sh
 ```
 
 

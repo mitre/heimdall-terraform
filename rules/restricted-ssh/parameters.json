@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks whether security groups that are in use disallow unrestricted incoming SSH traffic.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "restricted-ssh",
+    "SourceEvents": "AWS::EC2::SecurityGroup",
+    "SourceIdentifier": "INCOMING_SSH_DISABLED",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"EC2\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

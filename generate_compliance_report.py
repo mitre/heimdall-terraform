@@ -6,6 +6,7 @@ from openpyxl import load_workbook
 from openpyxl.styles import Alignment
 from pprint import pprint
 import re
+from uuid import uuid4
 import yaml
 
 
@@ -120,8 +121,38 @@ class ControlInfo():
             self.category,
             self.responsibility,
             self.validation_steps,
-            self.northcom_validated,
+            self.northcom_validated
         ]
+
+    def to_es_doc(self):
+        """
+
+        """
+        return {
+            'name': self.name
+            'description': self.description,
+            'controls': self.controls,
+            'compliance': self.compliance,
+            'test_type': self.test_type,
+            'cloud_resource': self.cloud_resource,
+            'category': self.category,
+            'responsibility': self.responsibility,
+            'validation_steps': self.validation_steps,
+            'northcom_validate': self.northcom_validated,
+            'compliant_resources': [],
+            'non_complaint_resources': []
+        }
+
+    @staticmethod
+    def all_to_es_doc(control_infos):
+        """
+
+        """
+        return {
+            'compliance_report_id': str(uuid4()),
+            'control_info': [ci.to_es_doc() for ci in control_infos],
+            'created_at': datetime.datetime.utcnow()
+        }
 
     def __repr__(self):
         return f'ControlInfo({self.name}, {self.compliance})'

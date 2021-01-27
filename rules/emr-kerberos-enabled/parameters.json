@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "The rule is NON_COMPLIANT if a security configuration is not attached to the cluster or the security configuration does not satisfy the specified rule parameters.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "emr-kerberos-enabled",
+    "SourceIdentifier": "EMR_KERBEROS_ENABLED",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"EMR\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

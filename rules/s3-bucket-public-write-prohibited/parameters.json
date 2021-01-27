@@ -1,0 +1,46 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks that your Amazon S3 buckets do not allow public write access. The rule checks the Block Public Access settings, the bucket policy, and the bucket access control list (ACL).",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "Remediation": {
+      "Automatic": true,
+      "ConfigRuleName": "S3_Bucket_Public_Write_Prohibited",
+      "ExecutionControls": {
+        "SsmControls": {
+          "ConcurrentExecutionRatePercentage": "10",
+          "ErrorPercentage": "10"
+        }
+      },
+      "MaximumAutomaticAttempts": "10",
+      "Parameters": {
+        "AutomationAssumeRole": {
+          "StaticValue": {
+            "Values": [
+              {
+                "Fn::Sub": "arn:aws-us-gov:iam::${AWS::AccountId}:role/Config_Remediation_Role-S3_Bucket_Public_Write_Prohibited"
+              }
+            ]
+          }
+        },
+        "S3BucketName": {
+          "ResourceValue": {
+            "Value": "RESOURCE_ID"
+          }
+        }
+      },
+      "ResourceType": "AWS::S3::Bucket",
+      "RetryAttemptSeconds": "600",
+      "TargetId": "AWS-DisableS3BucketPublicReadWrite",
+      "TargetType": "SSM_DOCUMENT",
+      "TargetVersion": "1"
+    },
+    "RuleName": "s3-bucket-public-write-prohibited",
+    "SourceEvents": "AWS::S3::Bucket",
+    "SourceIdentifier": "S3_BUCKET_PUBLIC_WRITE_PROHIBITED",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"S3\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

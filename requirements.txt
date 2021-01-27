@@ -1,5 +1,7 @@
+elasticsearch==7.10.1
 prospector==1.2.0
 pycodestyle==2.4.0
 openpyxl==3.0.5
 csv2md==1.1.2
 rdk==0.7.12
+requests==2.22.0
