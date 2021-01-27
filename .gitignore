@@ -5,6 +5,11 @@ __pycache__/
 
 .DS_Store
 
-
 ~$*.xlsx
 Compliance-Results.xlsx
+
+/package
+
+.byebug_history
+vendor/
+function.zip

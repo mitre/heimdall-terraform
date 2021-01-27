@@ -1,4 +1,8 @@
 
+Access_Keys_Rotated:
+  - AC-02
+  - AC-02 (01)
+
 ACM_Certificate_Expiration_Check:
   - AC-17 (02)
 
@@ -7,10 +11,6 @@ ALB_HTTP_Drop_Invalid_Header_Enabled:
 
 ALB_HTTP_To_HTTPS_Redirection_Check:
   - AC-17 (02)
-
-Access_Keys_Rotated:
-  - AC-02
-  - AC-02 (01)
 
 Cloud_Trail_Cloud_Watch_Logs_Enabled:
   - AU-06 (03)
@@ -56,7 +56,7 @@ EBS_Snapshot_Public_Restorable_Check:
 EC2_Instances_In_VPC:
   - AC-04
   - SC-07
-  - SC-07 (03), 
+  - SC-07 (03)
 
 EC2_Instance_Detailed_Monitoring_Enabled:
   - CA-07

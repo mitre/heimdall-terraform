@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks whether AWS Database Migration Service replication instances are public. The rule is NON_COMPLIANT if PubliclyAccessible field is True.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "dms-replication-not-public",
+    "SourceIdentifier": "DMS_REPLICATION_NOT_PUBLIC",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Database Migration Service\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

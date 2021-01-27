@@ -1,0 +1,16 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "config:BatchGet*",
+                "config:Describe*",
+                "config:Get*",
+                "config:List*",
+                "config:Select*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}

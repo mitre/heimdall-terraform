@@ -1,0 +1,132 @@
+##
+# AWS CloudFormation template targeted at deploying the ConfigToHdf
+# lambda function and all of its supporting resources.
+#
+# https://aws.amazon.com/blogs/devops/passing-parameters-to-cloudformation-stacks-with-the-aws-cli-and-powershell/
+#
+
+# https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/parameters-section-structure.html
+Parameters:
+  HeimdallUrl:
+    Type: String
+    AllowedPattern: \Ahttps?:\/\/.+
+    Description: The Heimdall Server URL for use in ConfigToHdf.
+  HeimdallApiUser:
+    Type: String
+    Description: The Heimdall Server username for use in ConfigToHdf.
+  HeimdallApiPass:
+    NoEcho: true
+    Type: String
+    Description: The Heimdall Server password for storing as a secret and for use in ConfigToHdf.
+  HeimdallEvalTag:
+    Type: String
+    Description: The string to tag HDF results with in Heimdall.
+  SubnetId:
+    Type: String
+    Description: The VPC id to connect to the lambda.
+  SecurityGroupId:
+    Type: String
+    Description: The Security Group to connect to the lambda.
+  SecretsManagerEndpoint:
+    Type: String
+    Description: The Secrets Manager endpoint for use in the lambda.
+
+Resources:
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-secretsmanager-secret.html
+  # This secret needs to be pulled out of the YAML and be created separately 
+  # before using this cloudformation template. 
+  ConfigToHdfSecret:              
+    Type: AWS::SecretsManager::Secret
+    Properties: 
+      Name: ConfigToHdfSecret
+      Description: Contains a Heimdall Server password used in the ConfigToHdf lambda.
+      SecretString: !Ref HeimdallApiPass
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
+  ConfigToHdfRole:
+    Type: AWS::IAM::Role
+    Properties: 
+      RoleName: ConfigToHdfRole
+      Description: IAM Role for executing the ConfigToHdf lambda.
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
+      Policies: 
+        - PolicyName: AwsConfigReadAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - config:BatchGet*
+                  - config:Describe*
+                  - config:Get*
+                  - config:List*
+                  - config:Select*
+                Resource: '*'
+        - PolicyName: AwsSecretsManagerReadAccess
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - secretsmanager:GetSecretValue
+                Resource: !Ref ConfigToHdfSecret
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-function.html#cfn-lambda-function-code
+  ConfigToHdf:
+    Type: AWS::Lambda::Function
+    Properties: 
+      FunctionName: ConfigToHdf
+      Description: Lambda capable of pulling AWS Config data, mapping to HDF, and pushing results to Heimdall Server API.
+      PackageType: Zip
+      Timeout: 300
+      Runtime: ruby2.7
+      MemorySize: 128
+      Handler: lambda_function.lambda_handler
+      Code: ../lambda/ConfigToHdf/function.zip
+      Role: !GetAtt ConfigToHdfRole.Arn
+      # These variables can be set as lambda environment variables or be
+      # passed through the event data.
+      Environment:
+        Variables:
+          HEIMDALL_URL: !Ref HeimdallUrl
+          HEIMDALL_API_USER: !Ref HeimdallApiUser
+          HEIMDALL_PASS_SECRET_NAME: 'ConfigToHdfSecret'
+          HEIMDALL_EVAL_TAG: !Ref HeimdallEvalTag
+          SECRETS_MANAGER_ENDPOINT: !Ref SecretsManagerEndpoint
+      # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-function-vpcconfig.html
+      VpcConfig:
+        SecurityGroupIds:
+          - !Ref SecurityGroupId
+        SubnetIds:
+          - !Ref SubnetId
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-events-rule.html
+  ConfigToHdfRule: 
+    Type: AWS::Events::Rule
+    Properties: 
+      Name: ConfigToHdfRule
+      Description: Event Rule schedule for triggering ConfigToHdf.
+      ScheduleExpression: rate(24 hours)
+      Targets: 
+        - Arn: !GetAtt ConfigToHdf.Arn
+          Id: "ConfigToHdf"
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-events-rule.html
+  PermissionForEventsToInvokeLambda: 
+    Type: AWS::Lambda::Permission
+    Properties: 
+      FunctionName: ConfigToHdf
+      Action: "lambda:InvokeFunction"
+      Principal: "events.amazonaws.com"
+      SourceArn: !GetAtt ConfigToHdfRule.Arn

@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks that there is at least one multi-region AWS CloudTrail. The rule is non-compliant if the trails do not match input parameters",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "multi-region-cloudtrail-enabled",
+    "SourceIdentifier": "MULTI_REGION_CLOUD_TRAIL_ENABLED",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"CloudTrail\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

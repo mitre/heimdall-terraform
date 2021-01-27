@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks whether the root user access key is available. The rule is compliant if the user access key does not exist.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "iam-root-access-key-check",
+    "SourceIdentifier": "IAM_ROOT_ACCESS_KEY_CHECK",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"IAM\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}
