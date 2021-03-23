@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks whether Amazon Elasticsearch Service domains are in Amazon Virtual Private Cloud (VPC). The rule is NON_COMPLIANT if ElasticSearch Service domain endpoint is public.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "elasticsearch-in-vpc-only",
+    "SourceIdentifier": "ELASTICSEARCH_IN_VPC_ONLY",
+    "SourcePeriodic": "TwentyFour_Hours",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Elasticsearch\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

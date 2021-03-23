@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks whether IAM groups have at least one IAM user.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "iam-group-has-users-check",
+    "SourceEvents": "AWS::IAM::Group",
+    "SourceIdentifier": "IAM_GROUP_HAS_USERS_CHECK",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"IAM\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}

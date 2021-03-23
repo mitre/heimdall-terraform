@@ -1,0 +1,14 @@
+{
+  "Parameters": {
+    "CodeKey": null,
+    "Description": "Checks whether AWS Secrets Manager secret rotation has rotated successfully as per the rotation schedule. The rule returns NON_COMPLIANT if RotationOccurringAsScheduled is false.",
+    "InputParameters": "{}",
+    "OptionalParameters": "{}",
+    "RuleName": "secretsmanager-scheduled-rotation-success-check",
+    "SourceEvents": "AWS::SecretsManager::Secret",
+    "SourceIdentifier": "SECRETSMANAGER_SCHEDULED_ROTATION_SUCCESS_CHECK",
+    "SourceRuntime": null
+  },
+  "Tags": "[{\"Key\": \"TestType\", \"Value\": \"AWS Managed\"}, {\"Key\": \"CloudResource\", \"Value\": \"Secrets Manager\"}, {\"Key\": \"Category\", \"Value\": \"Not Inherited\"}, {\"Key\": \"Responsibility\", \"Value\": \"USNORTHCOM\"}, {\"Key\": \"ValidationSteps\", \"Value\": \"-\"}, {\"Key\": \"USNORTHCOMValidated\", \"Value\": \"-\"}]",
+  "Version": "1.0"
+}
