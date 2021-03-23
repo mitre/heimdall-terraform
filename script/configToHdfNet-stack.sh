@@ -3,7 +3,7 @@ set -e
 
 delete() {
     # DELETE THE STACK:
-    aws cloudformation delete-stack --stack-name ConfigToHdfNetNetStack
+    aws cloudformation delete-stack --stack-name ConfigToHdfNetStack
 }
 
 update() {
