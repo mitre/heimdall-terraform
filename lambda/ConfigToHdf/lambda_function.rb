@@ -13,7 +13,7 @@
 #
 # export HEIMDALL_URL='http://my-heimdall-server.com'
 # export HEIMDALL_API_USER=''
-# export HEIMDALL_PASS_SECRET_NAME=''
+# export HEIMDALL_PASS_SSM_PARAM=''
 # export HEIMDALL_EVAL_TAG=''
 # export HEIMDALL_PUBLIC='true'
 #
@@ -21,7 +21,7 @@
 puts "RUBY_VERSION: #{RUBY_VERSION}"
 
 require 'aws-sdk-lambda'
-require 'aws-sdk-secretsmanager'
+require 'aws-sdk-ssm'
 # require 'aws-xray-sdk/lambda'
 require 'heimdall_tools'
 require 'json'
@@ -49,7 +49,7 @@ def lambda_handler(event:, context:)
   %w[
     HEIMDALL_URL
     HEIMDALL_API_USER
-    HEIMDALL_PASS_SECRET_NAME
+    HEIMDALL_PASS_SSM_PARAM
     HEIMDALL_EVAL_TAG
   ].each do |var|
     ENV[var] = event[var] if !event.nil? && event.include?(var)
@@ -60,22 +60,25 @@ def lambda_handler(event:, context:)
   logger.info('Validated environment variables.')
 
   ##
-  # Get Heimdall user password from AWS SecretsManager
+  # Get Heimdall user password from AWS SSM Parameter Store
   # If using within a VPC and using an interface endpoint, then
-  # specifying the SECRETS_MANAGER_ENDPOINT variable will allow reaching 
-  # secrets manager properly.
-  logger.info('Fetching Heimdall Password Secret...')
-  secrets_manager_client = nil
-  if ENV['SECRETS_MANAGER_ENDPOINT'].nil?
-    logger.info("Using default SecretsManager endpoint.")
-    secrets_manager_client = Aws::SecretsManager::Client.new
+  # specifying the SSM_ENDPOINT variable will allow reaching 
+  # SSM parameter store properly.
+  logger.info('Fetching Heimdall Password Secret from SSM parameter store...')
+  ssm_client = nil
+  if ENV['SSM_ENDPOINT'].nil?
+    logger.info("Using default SSM Parameter Store endpoint.")
+    ssm_client = Aws::SSM::Client.new
   else
-    endpoint = "https://#{/vpce.+/.match(ENV['SECRETS_MANAGER_ENDPOINT'])[0]}"
-    logger.info("Using SecretsManager endpoint: #{ENV['SECRETS_MANAGER_ENDPOINT']}")
-    secrets_manager_client = Aws::SecretsManager::Client.new(endpoint: endpoint)
+    endpoint = "https://#{/vpce.+/.match(ENV['SSM_ENDPOINT'])[0]}"
+    logger.info("Using SSM Parameter Store endpoint: #{endpoint}")
+    ssm_client = Aws::SSM::Client.new(endpoint: endpoint)
   end
-  resp = secrets_manager_client.get_secret_value({ secret_id: ENV['HEIMDALL_PASS_SECRET_NAME'] })
-  heimdall_user_password = resp.secret_string
+  resp = ssm_client.get_parameter({
+    name: ENV['HEIMDALL_PASS_SSM_PARAM'],
+    with_decryption: true,
+  })
+  heimdall_user_password = resp.parameter.value
 
   ##
   # Get a Heimdall API Token.
@@ -105,7 +108,15 @@ def lambda_handler(event:, context:)
   #
   # https://github.com/mitre/heimdall_tools
   logger.info('Running AwsConfigMapper...')
-  aws_config_hdf_mapper = HeimdallTools::AwsConfigMapper.new(nil)
+  aws_config_hdf_mapper = nil
+  if ENV['CONFIG_MANAGER_ENDPOINT'].nil?
+    logger.info("Using default Config endpoint.")
+    aws_config_hdf_mapper = HeimdallTools::AwsConfigMapper.new(nil)
+  else
+    endpoint = "https://#{/vpce.+/.match(ENV['CONFIG_MANAGER_ENDPOINT'])[0]}"
+    logger.info("Using Config endpoint: #{endpoint}")
+    aws_config_hdf_mapper = HeimdallTools::AwsConfigMapper.new(nil, endpoint)
+  end
   hdf_hash = JSON.parse(aws_config_hdf_mapper.to_hdf)
   logger.info('AwsConfigMapper execution completed.')
 

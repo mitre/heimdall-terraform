@@ -13,3 +13,26 @@ Compliance-Results.xlsx
 .byebug_history
 vendor/
 function.zip
+
+
+generated-files
+
+**.pem
+
+## Terraform/Terragrunt Stuff
+**.tfstate
+**.terraform
+**.terragrunt-cache
+*.tfstate.backup
+**terraform.tfstate.**
+
+## EKS kubeconfig 
+kubeconfig_**
+## RKE2 Kubeconfig
+*rke2.yaml
+
+## Mac
+**/.DS_Store
+
+# Docker image
+heimdall2.tar
