@@ -1,3 +1,12 @@
+##
+# export HeimdallUrl=''
+# export HeimdallApiUser='ConfigToHdf@example.com'
+# export HeimdallApiPass=''
+# export HeimdallEvalTag='ConfigToHdf'
+# export VpcId=''
+# export SubnetIdA=''
+# export SubnetIdB=''
+#
 
 set -e
 
@@ -14,7 +23,7 @@ validate_env() {
 
     # https://linuxhint.com/bash_loop_list_strings/
     # https://stackoverflow.com/questions/50763087/bash-check-environment-variables-are-set-in-an-array-of-env-vars
-    declare -a StringArray=("HeimdallUrl" "HeimdallApiUser" "HeimdallApiPass" "HeimdallEvalTag" "SubnetId" "SecurityGroupId" "SecretsManagerEndpoint")
+    declare -a StringArray=("HeimdallUrl" "HeimdallApiUser" "HeimdallApiPass" "HeimdallEvalTag" "SubnetIdA" "SubnetIdB" "VpcId")
     for expectedVar in ${StringArray[@]}; do
         if [ -z "${!expectedVar+x}" ]; then
             echo "$expectedVar is expected to be set as an environment variable!"
@@ -33,7 +42,7 @@ delete() {
 stack_update() {
     aws cloudformation package \
       --template-file ./cloud-formation/ConfigToHdf.yaml \
-      --s3-bucket config-to-hdf-bucket \
+      --s3-bucket config-to-hdf-bucket-il5 \
       --output-template-file ./cloud-formation/packaged-ConfigToHdf.yaml
 
     # UPDATE THE STACK:
@@ -45,9 +54,9 @@ stack_update() {
                    ParameterKey=HeimdallApiUser,ParameterValue=$HeimdallApiUser \
                    ParameterKey=HeimdallApiPass,ParameterValue=$HeimdallApiPass \
                    ParameterKey=HeimdallEvalTag,ParameterValue=$HeimdallEvalTag \
-                   ParameterKey=SubnetId,ParameterValue=$SubnetId \
-                   ParameterKey=SecurityGroupId,ParameterValue=$SecurityGroupId \
-                   ParameterKey=SecretsManagerEndpoint,ParameterValue=$SecretsManagerEndpoint
+                   ParameterKey=SubnetIdA,ParameterValue=$SubnetIdA \
+                   ParameterKey=SubnetIdB,ParameterValue=$SubnetIdB \
+                   ParameterKey=VpcId,ParameterValue=$VpcId
 }
 
 update() {
@@ -58,16 +67,16 @@ update() {
 
 create() {
     # CREATE S3 BUCKET FOR LAMBDA CODE STORAGE:
-    aws s3 mb s3://config-to-hdf-bucket || aws s3api head-bucket --bucket config-to-hdf-bucket
+    aws s3 mb s3://config-to-hdf-bucket-il5 || aws s3api head-bucket --bucket config-to-hdf-bucket-il5
     aws s3api put-public-access-block \
-       --bucket config-to-hdf-bucket \
+       --bucket config-to-hdf-bucket-il5 \
        --public-access-block-configuration "BlockPublicAcls=true,IgnorePublicAcls=true,BlockPublicPolicy=true,RestrictPublicBuckets=true"
 
     # PACKAGE THE LAMBDA CODE ZIP AND UPLOAD TO S3:
     ./script/build-lambda.sh
     aws cloudformation package \
       --template-file ./cloud-formation/ConfigToHdf.yaml \
-      --s3-bucket config-to-hdf-bucket \
+      --s3-bucket config-to-hdf-bucket-il5 \
       --output-template-file ./cloud-formation/packaged-ConfigToHdf.yaml
 
     # CREATE THE STACK:
@@ -79,9 +88,9 @@ create() {
                    ParameterKey=HeimdallApiUser,ParameterValue=$HeimdallApiUser \
                    ParameterKey=HeimdallApiPass,ParameterValue=$HeimdallApiPass \
                    ParameterKey=HeimdallEvalTag,ParameterValue=$HeimdallEvalTag \
-                   ParameterKey=SubnetId,ParameterValue=$SubnetId \
-                   ParameterKey=SecurityGroupId,ParameterValue=$SecurityGroupId \
-                   ParameterKey=SecretsManagerEndpoint,ParameterValue=$SecretsManagerEndpoint
+                   ParameterKey=SubnetIdA,ParameterValue=$SubnetIdA \
+                   ParameterKey=SubnetIdB,ParameterValue=$SubnetIdB \
+                   ParameterKey=VpcId,ParameterValue=$VpcId
 }
 
 if [[ "$1" == "create" ]]
@@ -109,4 +118,5 @@ else
     echo "    $0 create"
     echo "    $0 update"
     echo "    $0 delete"
+    echo "    $0 stack-update"
 fi

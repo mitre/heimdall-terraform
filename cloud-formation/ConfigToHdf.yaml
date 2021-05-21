@@ -21,15 +21,15 @@ Parameters:
   HeimdallEvalTag:
     Type: String
     Description: The string to tag HDF results with in Heimdall.
-  SubnetId:
+  VpcId:
     Type: String
-    Description: The VPC id to connect to the lambda.
-  SecurityGroupId:
+    Description: The VPC ID to associate with security groups and endpoints
+  SubnetIdA:
     Type: String
-    Description: The Security Group to connect to the lambda.
-  SecretsManagerEndpoint:
+    Description: The first VPC id to connect to the lambda.
+  SubnetIdB:
     Type: String
-    Description: The Secrets Manager endpoint for use in the lambda.
+    Description: The second VPC id to connect to the lambda.
 
 Resources:
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-secretsmanager-secret.html
@@ -41,6 +41,210 @@ Resources:
       Name: ConfigToHdfSecret
       Description: Contains a Heimdall Server password used in the ConfigToHdf lambda.
       SecretString: !Ref HeimdallApiPass
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-vpcendpoint.html
+  # https://docs.aws.amazon.com/secretsmanager/latest/userguide/vpc-endpoint-overview.html
+  ConfigToHdfSecretVpcEndpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      # InvalidPolicyDocument. Why? I don't know - it's the same as the IAM role
+      # PolicyDocument:
+      #   Version: 2012-10-17
+      #   Statement:
+      #     - Effect: Allow
+      #       Action:
+      #         - secretsmanager:GetSecretValue
+      #       Resource: 
+      #         - !Ref ConfigToHdfSecret
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.secretsmanager'
+      PrivateDnsEnabled: True
+      VpcId: !Ref VpcId
+      VpcEndpointType: Interface
+      SecurityGroupIds:
+        - !Ref ConfigToHdfSecretIngressSecurityGroup
+      SubnetIds:
+        - !Ref SubnetIdA
+        - !Ref SubnetIdB
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-vpcendpoint.html
+  ConfigToHdfConfigVpcEndpoint:
+    Type: 'AWS::EC2::VPCEndpoint'
+    Properties:
+      # "Service com.amazonaws.us-gov-west-1.config only supports the full-access endpoint policy."
+      # PolicyDocument:
+      #   Version: 2012-10-17
+      #   Statement:
+      #     - Effect: Allow
+      #       Action:
+      #         - config:BatchGet*
+      #         - config:Describe*
+      #         - config:Get*
+      #         - config:List*
+      #         - config:Select*
+      #       Resource: '*'
+      ServiceName: !Sub 'com.amazonaws.${AWS::Region}.config'
+      PrivateDnsEnabled: True
+      VpcId: !Ref VpcId
+      VpcEndpointType: Interface
+      SecurityGroupIds:
+        - !Ref ConfigToHdfConfigIngressSecurityGroup
+      SubnetIds:
+        - !Ref SubnetIdA
+        - !Ref SubnetIdB
+
+  # How to restrict access to only resources that are in the same security group:
+  # https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/security-group-rules-reference.html
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-ingress.html
+  # ONLY allow receiving traffic from ingress -> egress
+  ConfigToHdfConfigIngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ONLY allow traffic from egress to ingress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: ConfigToHdfConfigIngressSecurityGroup
+  ConfigToHdfHeimdallIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - ConfigToHdfConfigEgressSecurityGroup
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - ConfigToHdfConfigIngressSecurityGroup
+        - GroupId
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-ingress.html
+  # ONLY allow traffic from ingress -> egress
+  ConfigToHdfConfigEgressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ONLY allow traffic from egress to ingress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: ConfigToHdfConfigEgressSecurityGroup
+  ConfigToHdfHeimdallEgressRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - ConfigToHdfConfigIngressSecurityGroup
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - ConfigToHdfConfigEgressSecurityGroup
+        - GroupId
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-ingress.html
+  # ONLY allow receiving traffic from ingress -> egress
+  ConfigToHdfHeimdallIngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ONLY allow traffic from egress to ingress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: ConfigToHdfHeimdallIngressSecurityGroup
+  ConfigToHdfHeimdallIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - ConfigToHdfHeimdallEgressSecurityGroup
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - ConfigToHdfHeimdallIngressSecurityGroup
+        - GroupId
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-ingress.html
+  # ONLY allow traffic from ingress -> egress
+  ConfigToHdfHeimdallEgressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ONLY allow traffic from egress to ingress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: ConfigToHdfHeimdallEgressSecurityGroup
+  ConfigToHdfHeimdallEgressRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - ConfigToHdfHeimdallIngressSecurityGroup
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - ConfigToHdfHeimdallEgressSecurityGroup
+        - GroupId
+
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-ingress.html
+  # ONLY allow receiving traffic from ingress -> egress
+  ConfigToHdfSecretIngressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ONLY allow traffic from egress to ingress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: ConfigToHdfSecretIngressSecurityGroup
+  ConfigToHdfHeimdallIngressRule:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId:
+        Fn::GetAtt:
+        - ConfigToHdfSecretEgressSecurityGroup
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - ConfigToHdfSecretIngressSecurityGroup
+        - GroupId
+
+  # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-security-group-ingress.html
+  # ONLY allow traffic from ingress -> egress
+  ConfigToHdfSecretEgressSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: ONLY allow traffic from egress to ingress
+      VpcId: !Ref VpcId
+      Tags:
+        - Key: Name
+          Value: ConfigToHdfSecretEgressSecurityGroup
+  ConfigToHdfHeimdallEgressRule:
+    Type: AWS::EC2::SecurityGroupEgress
+    Properties:
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      DestinationSecurityGroupId:
+        Fn::GetAtt:
+        - ConfigToHdfSecretIngressSecurityGroup
+        - GroupId
+      GroupId:
+        Fn::GetAtt:
+        - ConfigToHdfSecretEgressSecurityGroup
+        - GroupId
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-iam-role.html
   ConfigToHdfRole:
@@ -103,13 +307,17 @@ Resources:
           HEIMDALL_API_USER: !Ref HeimdallApiUser
           HEIMDALL_PASS_SECRET_NAME: 'ConfigToHdfSecret'
           HEIMDALL_EVAL_TAG: !Ref HeimdallEvalTag
-          SECRETS_MANAGER_ENDPOINT: !Ref SecretsManagerEndpoint
+          SECRETS_MANAGER_ENDPOINT: !Select [ 1, !GetAtt ConfigToHdfSecretVpcEndpoint.DnsEntries ]
+          CONFIG_MANAGER_ENDPOINT: !Select [ 1, !GetAtt ConfigToHdfConfigVpcEndpoint.DnsEntries ]
       # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-lambda-function-vpcconfig.html
       VpcConfig:
         SecurityGroupIds:
-          - !Ref SecurityGroupId
+          - !Ref ConfigToHdfHeimdallEgressSecurityGroup
+          - !Ref ConfigToHdfSecretEgressSecurityGroup
+          - !Ref ConfigToHdfConfigEgressSecurityGroup
         SubnetIds:
-          - !Ref SubnetId
+          - !Ref SubnetIdA
+          - !Ref SubnetIdB
 
   # https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-events-rule.html
   ConfigToHdfRule: 

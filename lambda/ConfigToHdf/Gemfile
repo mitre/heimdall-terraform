@@ -3,7 +3,8 @@
 source 'https://rubygems.org'
 
 # gem 'aws-sdk-configservice', '~> 1'
-gem 'aws-sdk-secretsmanager', '~> 1'
+# gem 'aws-sdk-secretsmanager', '~> 1'
+gem 'aws-sdk-ssm', '~> 1'
 gem 'aws-sdk-lambda', '1.39.0'
 # gem 'aws-xray-sdk', '0.11.4'
 gem 'heimdall_tools'
