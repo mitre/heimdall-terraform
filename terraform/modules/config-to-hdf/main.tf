@@ -38,46 +38,6 @@ resource "aws_ssm_parameter" "heimdall_pass_ssm_param" {
 }
 
 ##
-# ConfigToHdf AWS SSM VPC Endpoint for accessing password SSM parameter
-#
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
-#
-resource "aws_vpc_endpoint" "ConfigToHdfSsmVpcEndpoint" {
-  vpc_id            = var.vpc_id
-  service_name      = "com.amazonaws.${var.aws_region}.ssm"
-  vpc_endpoint_type = "Interface"
-
-  subnet_ids         = var.subnet_ids
-  security_group_ids = var.SsmVpcEndpoint_security_groups
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ConfigToHdfSsmVpcEndpoint-${var.deployment_id}"
-  }
-}
-
-##
-# ConfigToHdf AWS Config VPC Endpoint
-#
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
-#
-resource "aws_vpc_endpoint" "ConfigToHdfConfigVpcEndpoint" {
-  vpc_id            = var.vpc_id
-  service_name      = "com.amazonaws.${var.aws_region}.config"
-  vpc_endpoint_type = "Interface"
-
-  subnet_ids         = var.subnet_ids
-  security_group_ids = var.ConfigVpcEndpoint_security_groups
-
-  private_dns_enabled = true
-
-  tags = {
-    Name = "ConfigToHdfConfigVpcEndpoint-${var.deployment_id}"
-  }
-}
-
-##
 # ConfigToHdf Role to Invoke ConfigToHdf Lambda function 
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role

@@ -3,7 +3,7 @@ require 'aws-sdk-ssm'
 require 'json'
 require 'inspec'
 require 'logger'
-require 'byebug'
+# require 'byebug'
 # require 'aws-sdk'
 
 ##

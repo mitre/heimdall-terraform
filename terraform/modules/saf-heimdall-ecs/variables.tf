@@ -21,6 +21,10 @@ variable "deployment_id" {
   default = "000"
 }
 
+variable "s3VpcEndpointPrefixListCidr" {
+  type = string
+}
+
 # Heimdall config and Networking ################
 
 variable "heimdall_image" {

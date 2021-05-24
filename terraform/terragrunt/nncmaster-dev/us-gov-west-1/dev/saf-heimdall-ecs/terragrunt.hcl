@@ -21,8 +21,6 @@ include {
   path = find_in_parent_folders()
 }
 
-
-# Define any dependencies from other modules
 # Define any dependencies from other modules 
 dependency "random" {
   config_path = "../random"
@@ -46,6 +44,14 @@ dependency "saf-tenant-security-groups" {
 
   mock_outputs = {
     SafHTTPCommsSG_id = "temporary-dummy-sg-id"
+  }
+}
+
+dependency "saf-tenant-endpoints" {
+  config_path = "../saf-tenant-endpoints"
+
+  mock_outputs = {
+    s3VpcEndpointPrefixListCidr = "0.0.0.0/0"
   }
 }
 
@@ -93,6 +99,8 @@ inputs = {
   rds_db_name      = dependency.saf-heimdall-rds.outputs.rds_db_name
   rds_user_name    = dependency.saf-heimdall-rds.outputs.rds_user_name
   rds_password     = dependency.saf-heimdall-rds.outputs.rds_password
+
+  s3VpcEndpointPrefixListCidr = dependency.saf-tenant-endpoints.outputs.s3VpcEndpointPrefixListCidr
 
   ecs_security_group_ids = [
     dependency.saf-heimdall-rds.outputs.rds_sg_id,
