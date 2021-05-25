@@ -23,17 +23,53 @@ resource "aws_s3_bucket" "inspec_lambda_code_bucket" {
   }
 }
 
+# Elastic Container Registry for SAF deployment
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository
+#
+resource "aws_ecr_repository" "mitre_serverless_inspec" {
+  name                 = "mitre/serverless-inspec"
+  image_tag_mutability = "MUTABLE"
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "null_resource" "push_image" {
+  depends_on = [
+    aws_ecr_repository.mitre_serverless_inspec,
+  ]
+
+  # Ensures this script always runs
+  triggers = {
+    always_run = timestamp()
+  }
+
+  # https://www.terraform.io/docs/language/resources/provisioners/local-exec.html
+  provisioner "local-exec" {
+    command = "./push-image.sh"
+
+    environment = {
+      AWS_REGION     = var.aws_region
+      AWS_ACCOUNT_ID = var.account_id
+      IMAGE_FILE     = "serverless-inspec.tar"
+      REPO_NAME      = "mitre/serverless-inspec"
+      IMAGE_TAG      = "latest"
+    }
+  }
+}
 
 ##
 # S3 zip file uploaded from local zip that contains the lambda package
 # 
 #
 #
-resource "aws_s3_bucket_object" "InSpecZip" {
-  bucket = aws_s3_bucket.inspec_lambda_code_bucket.id
-  key    = "${filemd5(var.function_zip_path)}.zip"
-  source = var.function_zip_path
-}
+# resource "aws_s3_bucket_object" "InSpecZip" {
+#   bucket = aws_s3_bucket.inspec_lambda_code_bucket.id
+#   key    = "${filemd5(var.function_zip_path)}.zip"
+#   source = var.function_zip_path
+# }
 
 
 ##
@@ -139,11 +175,9 @@ module "InSpec" {
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_groups
 
-  create_package      = false
-  s3_existing_package = {
-    bucket = aws_s3_bucket.inspec_lambda_code_bucket.id
-    key    = aws_s3_bucket_object.InSpecZip.id
-  }
+  create_package = false
+  image_uri    = "${var.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/mitre/serverless-inspec:latest"
+  package_type = "Image"
 
   environment_variables = {
     HOME = "/tmp"

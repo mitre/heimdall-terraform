@@ -15,8 +15,10 @@ locals {
   aws_region   = local.region_vars.locals.aws_region
   account_name = local.account_vars.locals.account_name
 
-  exec_multi_path  = abspath("../../../../../lambda/InSpec/function.zip")
-  exec_single_path = abspath("../../../../../../lambda/InSpec/function.zip")
+
+  exec_dockerfile_multi_path  = abspath("../../../../../lambda/InSpec/Dockerfile")
+  exec_multi_path  = abspath("../../../../../lambda/InSpec/")
+  exec_single_path = abspath("../../../../../../lambda/InSpec/")
 }
 
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
@@ -71,6 +73,8 @@ dependency "inspec-s3" {
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
   env               = local.env
+  aws_region        = local.region_vars.locals.aws_region
+  account_id        = local.account_vars.locals.account_id
   deployment_id     = dependency.random.outputs.deployment_id
   profileBucketArn  = dependency.inspec-s3.outputs.inspec_profiles_bucket_arn
   subnet_ids        = dependency.saf-tenant-net.outputs.private_subnet_ids
@@ -78,5 +82,5 @@ inputs = {
     dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id,
     dependency.saf-tenant-security-groups.outputs.SafEgressOnlySG_id
   ]
-  function_zip_path = fileexists(local.exec_multi_path) ? local.exec_multi_path : local.exec_single_path
+  function_path = fileexists(local.exec_dockerfile_multi_path) ? local.exec_multi_path : local.exec_single_path
 }

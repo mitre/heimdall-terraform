@@ -76,6 +76,7 @@ def build_config(event, file_path, logger)
 
   if /ssh:\/\/.+@m?i-[a-z0-9]{17}/.match? config['target'] 
     logger.info('Using proxy SSM session to SSH to managed EC2 instance.')
+    puts `sh -c "aws ssm start-session --target i-09f17fd0396d9c6f7 --document-name AWS-StartSSHSession --parameters portNumber=22"`
     config["proxy_command"] = 'sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p"'
   end
 

@@ -3,6 +3,14 @@ variable "env" {
   type = string
 }
 
+variable "aws_region" {
+  type = string
+}
+
+variable "account_id" {
+  type = string
+}
+
 variable "deployment_id" {
   description = "The deployment AWS region."
   type        = string
@@ -23,8 +31,13 @@ variable "security_groups" {
   type        = list(string)
 }
 
-variable "function_zip_path" {
-  description = "The local file path to the zipped lambda."
+# variable "function_zip_path" {
+#   description = "The local file path to the zipped lambda."
+#   type        = string
+# }
+
+variable "function_path" {
+  description = "The local file path to the lambda."
   type        = string
 }
 

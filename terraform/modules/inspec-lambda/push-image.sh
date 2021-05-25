@@ -1,4 +1,4 @@
-set -e
+set -xe
 
 ##
 # ENV validation
@@ -28,6 +28,8 @@ if [ -z "$IMAGE_TAG" ]; then
     exit 1
 fi
 
+echo "AWS_REGION=$'AWS_REGION' AWS_ACCOUNT_ID=$AWS_'ACCOUNT_ID' IMAGE_FILE=$'IMAGE_FILE' REPO_NAME='$REPO_NAME' IMAGE_TAG='$IMAGE_TAG'"
+
 ##
 # Ensure the image file exists
 #
@@ -42,6 +44,8 @@ fi
 #
 IMAGE_IDENTIFIER="$REPO_NAME:$IMAGE_TAG"
 IMAGE="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_IDENTIFIER"
+echo $IMAGE_IDENTIFIER
+echo $IMAGE
 
 ##
 # Log in to the AWS ECR registry
@@ -58,10 +62,11 @@ docker load --input $IMAGE_FILE
 
 docker tag $IMAGE_IDENTIFIER $IMAGE
 
+
 ##
 # Check the SHA of the local and remote images. Don't push if they are the same
 #
-LOCAL_SHA=$(docker inspect --format='{{index .RepoDigests 0}}' $IMAGE | grep -oh 'sha256:[0-9,a-z]*')
+LOCAL_SHA=$(docker images --no-trunc --quiet $IMAGE_IDENTIFIER | grep -oh 'sha256:[0-9,a-z]*')
 REMOTE_SHA=$(aws ecr describe-images --repository-name $REPO_NAME --image-ids imageTag=$IMAGE_TAG --query 'imageDetails[0].imageDigest'| grep -oh 'sha256:[0-9,a-z]*' || echo 'image doesnt exist')
 echo "LOCAL SHA:  $LOCAL_SHA"
 echo "REMOTE SHA: $REMOTE_SHA"

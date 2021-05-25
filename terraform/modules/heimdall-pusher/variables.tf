@@ -53,9 +53,3 @@ variable "heimdall_password" {
   type        = string
   sensitive   = true
 }
-
-variable "heimdall_eval_tag" {
-  description = "The evaluation tag to attach to HDF formatted results"
-  type        = string
-  default     = "ConfigToHdf"
-}

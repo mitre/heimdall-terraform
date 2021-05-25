@@ -77,8 +77,6 @@ inputs = {
   subnet_ids       = dependency.saf-tenant-net.outputs.private_subnet_ids
 
   ConfigToHdf_security_groups       = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
-  SsmVpcEndpoint_security_groups    = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
-  ConfigVpcEndpoint_security_groups = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
 
   aws_region   = local.aws_region
   account_name = local.account_name
