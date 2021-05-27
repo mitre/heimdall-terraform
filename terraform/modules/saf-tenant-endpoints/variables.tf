@@ -1,3 +1,4 @@
+
 variable "aws_region" {
   description = "The deployment AWS region."
   type        = string
@@ -22,8 +23,3 @@ variable "security_groups" {
   description = "Security Groups to assign to endpoints."
   type        = list(string)
 }
-
-
-
-
-

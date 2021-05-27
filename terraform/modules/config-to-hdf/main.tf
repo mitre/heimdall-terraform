@@ -9,35 +9,6 @@ terraform {
 }
 
 ##
-# The KMS key used to encrypt/decrypt ConfigToHdf's Heimdall account password 
-#
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key
-#
-resource "aws_kms_key" "HeimdallPassKmsKey" {
-  description             = "The KMS key used to encrypt/decrypt ConfigToHdf's Heimdall account password "
-  deletion_window_in_days = 10
-  # https://docs.aws.amazon.com/kms/latest/developerguide/key-policies.html
-  # policy = "TODO"
-
-  tags = {
-    Name = "HeimdallPassKmsKey-${var.deployment_id}"
-  }
-}
-
-##
-# SSM SecureString parameter for the Heimdall password
-#
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ssm_parameter
-#
-resource "aws_ssm_parameter" "heimdall_pass_ssm_param" {
-  name        = "/${var.aws_region}/${var.env}/heimdall_pass_ssm_param"
-  description = "Stores the password for ConfigToHdf's Heimdall account."
-  type        = "SecureString"
-  value       = var.heimdall_password
-  key_id      = aws_kms_key.HeimdallPassKmsKey.key_id
-}
-
-##
 # ConfigToHdf Role to Invoke ConfigToHdf Lambda function 
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
@@ -66,6 +37,42 @@ resource "aws_iam_role" "ConfigToHdfRole" {
     ]
   })
 
+  # Allow invoking the HeimdallPusher lambda
+  # inline_policy {
+  #   name = "AllowHeimdallPusherInvoke"
+
+  #   policy = jsonencode({
+  #     Version = "2012-10-17"
+  #     Statement = [
+  #       {
+  #         Action = [
+  #           "lambda:InvokeFunction"
+  #         ]
+  #         Effect   = "Allow"
+  #         Resource = var.heimdall_pusher_lambda_arn
+  #       }
+  #     ]
+  #   })
+  # }
+
+  # Allow S3 write access to InSpec results bucket
+  inline_policy {
+    name = "S3ResultsAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "s3:PutObject"
+          ]
+          Effect   = "Allow"
+          Resource = "${data.aws_s3_bucket.results_bucket.arn}/*"
+        }
+      ]
+    })
+  }
+
   # Allow READ access to AWS Config
   inline_policy {
     name = "AwsConfigReadAccess"
@@ -87,41 +94,15 @@ resource "aws_iam_role" "ConfigToHdfRole" {
       ]
     })
   }
+}
 
-  # Allow READ access to Heimdall password SSM parameter
-  inline_policy {
-    name = "HeimdallPassSsmReadAccess"
-
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "ssm:GetParameter"
-          ]
-          Effect   = "Allow"
-          Resource = aws_ssm_parameter.heimdall_pass_ssm_param.arn
-        }
-      ]
-    })
-  }
-
-  inline_policy {
-    name = "AllowHeimdallPassKmsKeyDecrypt"
-
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "kms:Decrypt"
-          ]
-          Effect   = "Allow"
-          Resource = aws_kms_key.HeimdallPassKmsKey.arn
-        }
-      ]
-    })
-  }
+##
+# Get bucket data for use elsewhere
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/s3_bucket
+#
+data "aws_s3_bucket" "results_bucket" {
+  bucket = var.results_bucket_id
 }
 
 ##
@@ -147,10 +128,7 @@ module "ConfigToHdf" {
   local_existing_package = var.function_zip_path # "../../../lambda/ConfigToHdf/function.zip"
 
   environment_variables = {
-    HEIMDALL_URL            = var.heimdall_url
-    HEIMDALL_API_USER       = var.heimdall_user
-    HEIMDALL_PASS_SSM_PARAM = aws_ssm_parameter.heimdall_pass_ssm_param.name
-    HEIMDALL_EVAL_TAG       = var.heimdall_eval_tag
+    results_bucket = var.results_bucket_id
   }
 }
 

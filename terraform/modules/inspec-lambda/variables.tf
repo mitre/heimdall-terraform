@@ -16,8 +16,13 @@ variable "deployment_id" {
   type        = string
 }
 
-variable "profileBucketArn" {
+variable "profiles_bucket_arn" {
   description = "The ARN for the InSpec profile S3 bucket."
+  type        = string
+}
+
+variable "results_bucket_arn" {
+  description = "The ARN for the InSpec results S3 bucket."
   type        = string
 }
 
@@ -31,17 +36,7 @@ variable "security_groups" {
   type        = list(string)
 }
 
-# variable "function_zip_path" {
-#   description = "The local file path to the zipped lambda."
-#   type        = string
-# }
-
 variable "function_path" {
   description = "The local file path to the lambda."
   type        = string
 }
-
-
-
-
-

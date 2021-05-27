@@ -38,24 +38,12 @@ variable "account_name" {
   default = "missing-account-name"
 }
 
-variable "heimdall_url" {
-  description = "The url to the Heimdall server in http://... format"
+variable "heimdall_pusher_lambda_arn" {
+  description = "The ARN of the HeimdallPusher lambda function"
   type        = string
 }
 
-variable "heimdall_user" {
-  description = "The Heimdall user's email used to log in"
+variable "results_bucket_id" {
+  description = "The id/name for the InSpec results S3 bucket."
   type        = string
-}
-
-variable "heimdall_password" {
-  description = "The Heimdall user's password used to log in"
-  type        = string
-  sensitive   = true
-}
-
-variable "heimdall_eval_tag" {
-  description = "The evaluation tag to attach to HDF formatted results"
-  type        = string
-  default     = "ConfigToHdf"
 }

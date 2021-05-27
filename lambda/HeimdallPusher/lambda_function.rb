@@ -14,17 +14,18 @@
 # export HEIMDALL_PUBLIC='true'
 #
 
-puts "RUBY_VERSION: #{RUBY_VERSION}"
-$logger = Logger.new($stdout)
-
 require 'aws-sdk-lambda'
 require 'aws-sdk-ssm'
+require 'aws-sdk-s3'
 require 'json'
 require 'logger'
 require 'net/http'
 require 'net/http/post/multipart'
 require 'time'
 require 'uri'
+
+puts "RUBY_VERSION: #{RUBY_VERSION}"
+$logger = Logger.new($stdout)
 
 ##
 # The AWS lamdba entrypoint
@@ -33,17 +34,76 @@ require 'uri'
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Lambda/Client.html#invoke_async-instance_method
 #
 def lambda_handler(event:, context:)
-  eval_tags = event['eval_tags'].nil? ? 'HeimdallPusher' : event['eval_tags'] + ',HeimdallPusher'
+  puts event
 
-  validate_variables(event)
+  # validate_variables(event)
 
-  heimdall_user_password = get_heimdall_password
-
-  user_id, token = get_heimdall_api_token(heimdall_user_password)
-
-  push_to_heimdall(event, user_id, token, eval_tags)
+  records = (event['Records'] || [])
+  records.each do |record|
+      bucket_name = record.dig('s3', 'bucket', 'name')
+      object_key = record.dig('s3', 'object', 'key')
+      process_record(event, bucket_name, object_key)
+  end
 
   $logger.info('Lambda completed successfully!')
+end
+
+##
+# Process a S3 record that was passed via the event
+#
+def process_record(event, bucket_name, object_key)
+  return if bucket_name.nil? || object_key.nil?
+
+  record_contents = get_record_contents(bucket_name, object_key)
+  hdf = record_contents['data']
+  filename = object_key.split('/').last
+
+  record_contents['eval_tags'] = record_contents['eval_tags'].nil? ? 'HeimdallPusher' : record_contents['eval_tags'] + ',HeimdallPusher'
+
+  # Save to Heimdall
+  heimdall_user_password = get_heimdall_password
+  user_id, token = get_heimdall_api_token(heimdall_user_password)
+  push_to_heimdall(hdf, user_id, token, record_contents['eval_tags'])
+
+  # Save to S3
+  save_results_to_bucket(record_contents, bucket_name, filename)
+  save_hdf_to_bucket(hdf, bucket_name, filename)
+  remove_unprocessed_from_bucket(bucket_name, object_key)
+end
+
+def get_record_contents(bucket_name, object_key)
+  $logger.info('Fetching HDF record.')
+  s3_client = Aws::S3::Client.new
+  JSON.parse(s3_client.get_object(bucket: bucket_name, key: object_key).body.read)
+end
+
+def save_hdf_to_bucket(hdf, bucket_name, filename)
+  $logger.info('Saving processed HDF to bucket.')
+  s3_client = Aws::S3::Client.new
+  s3_client.put_object({
+    body: StringIO.new(hdf.to_json), 
+    bucket: bucket_name, 
+    key: "hdf/#{filename}", 
+  }) 
+end
+
+def save_results_to_bucket(results, bucket_name, filename)
+  $logger.info('Saving processed result to bucket.')
+  s3_client = Aws::S3::Client.new
+  s3_client.put_object({
+    body: StringIO.new(results.to_json), 
+    bucket: bucket_name, 
+    key: "processed/#{filename}", 
+  }) 
+end
+
+def remove_unprocessed_from_bucket(bucket_name, object_key)
+  $logger.info('Removing unprocessed result from bucket.')
+  s3_client = Aws::S3::Client.new
+  s3_client.delete_object({
+    bucket: bucket_name, 
+    key: object_key, 
+  })
 end
 
 ##
@@ -54,15 +114,6 @@ end
 # If expected variables are present in the event, then they will take priority.
 #
 def validate_variables(event)
-  ##
-  # event['data'] is expected to be the HDF that is sent to Heimdall
-  #
-  if event['data'].nil?
-    error = '"data" attribute MUST be passed through the event!'
-    $logger.error(error)
-    return { statusCode: 400, body: JSON.generate(error) }
-  end
-  
   $logger.info('Validating environment variables...')
   %w[
     HEIMDALL_URL
@@ -77,11 +128,12 @@ def validate_variables(event)
   ENV['HEIMDALL_URL'] = ENV['HEIMDALL_URL'].chop if ENV['HEIMDALL_URL'].end_with?('/')
   $logger.info('Validated environment variables.')
 end
+
 ##
 # Get Heimdall user password from AWS SSM Parameter Store.
 #
 # If using within a VPC and using an interface endpoint, then
-# specifying the SSM_ENDPOINT variable will allow reaching 
+# specifying the SSM_ENDPOINT variable will allow reaching
 # SSM parameter store properly.
 #
 def get_heimdall_password
@@ -89,7 +141,7 @@ def get_heimdall_password
   ssm_client = nil
 
   if ENV['SSM_ENDPOINT'].nil?
-    $logger.info("Using default SSM Parameter Store endpoint.")
+    $logger.info('Using default SSM Parameter Store endpoint.')
     ssm_client = Aws::SSM::Client.new
   else
     endpoint = "https://#{/vpce.+/.match(ENV['SSM_ENDPOINT'])[0]}"
@@ -98,9 +150,9 @@ def get_heimdall_password
   end
 
   resp = ssm_client.get_parameter({
-    name: ENV['HEIMDALL_PASS_SSM_PARAM'],
-    with_decryption: true,
-  })
+                                    name: ENV['HEIMDALL_PASS_SSM_PARAM'],
+                                    with_decryption: true
+                                  })
 
   resp.parameter.value
 end
@@ -111,7 +163,6 @@ end
 # https://github.com/mitre/heimdall2#api-usage
 #
 def get_heimdall_api_token(heimdall_user_password)
-
   $logger.info('Getting token from Heimdall Server...')
   payload = {
     'email': ENV['HEIMDALL_API_USER'],
@@ -132,7 +183,7 @@ def get_heimdall_api_token(heimdall_user_password)
   raise StandardError.new, 'Returned token is not a string!' unless token.is_a?(String)
   raise StandardError.new, 'Returned user ID is not a string!' unless user_id.is_a?(String)
 
-  user_id, token
+  [user_id, token]
 end
 
 ##
@@ -150,12 +201,12 @@ end
 #   -H "Authorization: Bearer <token>" \
 #   "http://my-heimdall/evaluations"
 #
-def push_to_heimdall(event, user_id, token, eval_tags)
+def push_to_heimdall(hdf, user_id, token, eval_tags)
   $logger.info('Pushing HDF results to Heimdall Server...')
   url = URI("#{ENV['HEIMDALL_URL']}/evaluations")
   filename = "AWS-Config-Results-#{Time.now.utc.iso8601}"
   payload = {
-    'data': UploadIO.new(StringIO.new(hdf_hash.to_json), "application/json", filename),
+    'data': UploadIO.new(StringIO.new(hdf.to_json), 'application/json', filename),
     'filename': filename,
     'userId': user_id,
     'public': ENV['HEIMDALL_PUBLIC'] || 'true',

@@ -54,7 +54,7 @@ inputs = {
   deployment_id   = dependency.random.outputs.deployment_id
   vpc_id          = dependency.saf-tenant-net.outputs.vpc_id
   subnet_ids      = dependency.saf-tenant-net.outputs.private_subnet_ids
-  security_groups = dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id
+  security_groups = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
 }
 
 

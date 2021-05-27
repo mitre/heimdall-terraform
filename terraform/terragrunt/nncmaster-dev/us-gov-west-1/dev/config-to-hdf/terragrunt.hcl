@@ -68,6 +68,22 @@ dependency "saf-heimdall-alb" {
   }
 }
 
+dependency "inspec-s3" {
+  config_path = "../inspec-s3"
+
+  mock_outputs = {
+    inspec_results_bucket_name = "dummy_bucket_name"
+  }
+}
+
+dependency "heimdall-pusher" {
+  config_path = "../heimdall-pusher"
+
+  mock_outputs = {
+    function_arn = "arn:aws-us-gov:iam::123456789000:service/resource"
+  }
+}
+
 
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
@@ -81,10 +97,9 @@ inputs = {
   aws_region   = local.aws_region
   account_name = local.account_name
 
-  heimdall_url      = "http://${dependency.saf-heimdall-alb.outputs.private_alb_address}"
-  heimdall_user     = "configToHdf@example.com"
-  heimdall_password = "foobar"
-  heimdall_eval_tag = "ConfigToHdf,${local.account_name}"
+  heimdall_pusher_lambda_arn = dependency.heimdall-pusher.outputs.function_arn
 
   function_zip_path = fileexists(local.exec_multi_path) ? local.exec_multi_path : local.exec_single_path
+
+  results_bucket_id = dependency.inspec-s3.outputs.inspec_results_bucket_name
 }

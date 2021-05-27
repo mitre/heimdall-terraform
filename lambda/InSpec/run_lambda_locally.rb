@@ -27,15 +27,62 @@ require_relative 'lambda_function'
 
 lambda_handler(
   event: {
-    "profile" => "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
+    "profile" => {
+      "bucket" => "inspec-profiles-bucket-dev-myzr",
+      "key" => "redhat-enterprise-linux-7-stig-baseline-master.zip"
+    },
     "profile_common_name" => "redhat-enterprise-linux-7-stig-baseline-master",
     "config" => {
       "target" => "ssh://ec2-user@i-09f17fd0396d9c6f7",
+      "input_file" => {
+        "bucket" => "inspec-profiles-bucket-dev-myzr",
+        "key" => "rhel7-stig-baseline-master-disable-slow-controls.yml"
+      },
       "sudo" => true
     }
   },
   context: nil
 )
+
+# {
+#     "ssh_key_ssm_param": "test-ssh-key",
+#     "profile": "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
+#     "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
+#     "config": {
+#       "target": "ssh://ec2-user@i-09f17fd0396d9c6f7",
+#       "sudo": true
+#     }
+# }
+
+# {
+#     "ssh_key_ssm_param": "test-ssh-key",
+#     "profile": "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
+#     "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
+#     "config": {
+#       "target": "ssh://ec2-user@ec2-160-1-122-76.us-gov-west-1.compute.amazonaws.com",
+#       "sudo": true
+#     }
+# }
+
+{
+    "heimdall_pusher_lambda": "HeimdallPusher-myzr",
+    "ssh_key_ssm_param": "test-ssh-key",
+    "profile": {
+      "bucket": "inspec-profiles-bucket-dev-myzr",
+      "key": "redhat-enterprise-linux-7-stig-baseline-master.zip"
+    },
+    "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
+    "config": {
+      "target": "ssh://ec2-user@ec2-160-1-122-76.us-gov-west-1.compute.amazonaws.com",
+      "sudo": true,
+      "input_file": {
+        "bucket": "inspec-profiles-bucket-dev-myzr",
+        "key": "rhel7-stig-baseline-master-disable-slow-controls.yml"
+      }
+    }
+}
+
+
 
 # lambda_handler(
 #   event: {

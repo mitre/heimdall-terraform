@@ -1,10 +1,15 @@
 
+require 'aws-sdk-lambda'
 require 'aws-sdk-ssm'
+require 'aws-sdk-s3'
 require 'json'
 require 'inspec'
 require 'logger'
 # require 'byebug'
 # require 'aws-sdk'
+
+puts "RUBY_VERSION: #{RUBY_VERSION}"
+$logger = Logger.new($stdout)
 
 ##
 #
@@ -32,56 +37,103 @@ require 'logger'
 #   - (https://docs.chef.io/inspec/cli/#exec)
 #
 def lambda_handler(event:, context:)
-  logger = Logger.new($stdout)
-
   # Set export filename
   filename, file_path = generate_json_file(event['profile_common_name'] || 'unnamed_profile')
   json_reporter = "json:" + file_path
-  logger.info("Will write JSON at #{file_path}")
+  $logger.info("Will write JSON at #{file_path}")
 
   # Build the config we will use when executing InSpec
-  config = build_config(event, file_path, logger)
+  config = build_config(event, file_path)
 
   # Define InSpec Runner
-  logger.info('Building InSpec runner.')
+  $logger.info('Building InSpec runner.')
   runner = Inspec::Runner.new(config)
 
   # Set InSpec Target
-  logger.info('Adding InSpec target.')
+  $logger.info('Adding InSpec target.')
   runner.add_target(event["profile"], config)
 
   # Trigger InSpec Scan
-  logger.info('Running InSpec.')
+  $logger.info('Running InSpec.')
   runner.run
 
-  # s3 = Aws::S3::Resource.new(region: 'us-east-1')
-  # bucket = event['s3_bucket'] or ENV['S3_DATA_BUCKET']
-  # # Create the object to upload
-  # obj = s3.bucket(bucket).object(filename)
-
-  # # Upload it      
-  # obj.upload_file(file_path)
+  s3_client = Aws::S3::Client.new
+  s3_client.put_object({
+    body: StringIO.new({
+      "data" => JSON.parse(File.read(file_path)),
+      "eval_tags" => "ServerlessInspec"
+    }.to_json), 
+    bucket: event['results_bucket'], 
+    key: "unprocessed/#{filename}", 
+  }) unless event['results_bucket'].nil?
 end
 
 ##
 # Generates the configuration that will be used for the InSpec execution
 #
-def build_config(event, file_path, logger)
+def build_config(event, file_path)
+  # Download S3 files if needed
+  handle_s3_profile(event)
+  handle_s3_input_file(event)
+
   # Start with a default config and merge in the config that was passed into the lambda
   config = default_config.merge(event['config'] || {}).merge(forced_config(file_path))
 
   # Add private key to config if it is present
-  ssh_key = fetch_ssh_key(event['ssh_key_ssm_param'], logger)
+  ssh_key = fetch_ssh_key(event['ssh_key_ssm_param'])
   config["key_files"] = [ssh_key] unless ssh_key.nil?
 
   if /ssh:\/\/.+@m?i-[a-z0-9]{17}/.match? config['target'] 
-    logger.info('Using proxy SSM session to SSH to managed EC2 instance.')
+    $logger.info('Using proxy SSM session to SSH to managed EC2 instance.')
+    # debugging puts, remove later
     puts `sh -c "aws ssm start-session --target i-09f17fd0396d9c6f7 --document-name AWS-StartSSHSession --parameters portNumber=22"`
     config["proxy_command"] = 'sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p"'
   end
 
-  logger.info("Built config: #{config}")
+  $logger.info("Built config: #{config}")
   config
+end
+
+##
+# If "profile" is a zip from an S3 bucket (notated by "profile" being a hash)
+# then we need to fetch the file and download it to /tmp/
+#
+# https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Client.html
+#
+def handle_s3_profile(event)
+  return unless event["profile"].is_a? Hash
+
+  unless event.dig("profile", "key").end_with? '.zip'
+    $logger.error 'InSpec profiles from S3 are only supported as ZIP files!'
+    exit 1
+  end
+
+  profile_download_path = '/tmp/inspec-profile.zip'
+  $logger.info("Downloading InSpec profile to #{profile_download_path}")
+  s3 = Aws::S3::Client.new
+  s3.get_object({ bucket: event["profile"]["bucket"], key: event["profile"]["key"] }, target: profile_download_path)
+
+  event["profile"] = profile_download_path
+end
+
+##
+# If "input_file" is located in an S3 bucket (notated by "profile" being a hash)
+# then we need to fetch the file and download it to /tmp/
+#
+# https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Client.html
+#
+def handle_s3_input_file(event)
+  return unless event.dig("config", "input_file").is_a? Hash
+
+  input_file_download_path = '/tmp/inspec-input_file.yml'
+  $logger.info("Downloading InSpec input_file to #{input_file_download_path}")
+  s3 = Aws::S3::Client.new
+  s3.get_object(
+    { bucket: event["config"]["input_file"]["bucket"], key: event["config"]["input_file"]["key"] },
+    target: input_file_download_path
+  )
+
+  event["config"]["input_file"] = [input_file_download_path]
 end
 
 ##
@@ -94,19 +146,19 @@ end
 #
 # Returns:
 # - nil if no key has been fetched, or path to key if downloaded.
-def fetch_ssh_key(ssh_key_ssm_param, logger)
+def fetch_ssh_key(ssh_key_ssm_param)
   if ssh_key_ssm_param.nil? || ssh_key_ssm_param.empty?
-    logger.info('ssh_key_ssm_param is blank. Will not fetch SSH key.')
+    $logger.info('ssh_key_ssm_param is blank. Will not fetch SSH key.')
     return nil
   end
 
   ssm_client = nil
   if ENV['SSM_ENDPOINT'].nil?
-    logger.info("Using default SSM Parameter Store endpoint.")
+    $logger.info("Using default SSM Parameter Store endpoint.")
     ssm_client = Aws::SSM::Client.new
   else
     endpoint = "https://#{/vpce.+/.match(ENV['SSM_ENDPOINT'])[0]}"
-    logger.info("Using SSM Parameter Store endpoint: #{endpoint}")
+    $logger.info("Using SSM Parameter Store endpoint: #{endpoint}")
     ssm_client = Aws::SSM::Client.new(endpoint: endpoint)
   end
   resp = ssm_client.get_parameter({
@@ -166,8 +218,8 @@ def default_config
 end
 
 
-def generate_json_file(service_type)
-  filename = 'inspec-' + service_type + '-' + Time.now.strftime("%Y-%m-%d_%H-%M-%S") + '.json'
+def generate_json_file(name)
+  filename = "#{Time.now.strftime("%Y-%m-%d_%H-%M-%S")}_#{name}.json"
   file_path = '/tmp/' + filename
   return filename, file_path
 end

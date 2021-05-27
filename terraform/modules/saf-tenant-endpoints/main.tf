@@ -28,8 +28,28 @@ resource "aws_vpc_endpoint" "s3VpcEndpoint" {
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/prefix_list
 #
-data "aws_prefix_list" "s3VpcEndpointPrefixList" {
-  prefix_list_id = aws_vpc_endpoint.s3VpcEndpoint.prefix_list_id
+# data "aws_prefix_list" "s3VpcEndpointPrefixList" {
+#   prefix_list_id = aws_vpc_endpoint.s3VpcEndpoint.prefix_list_id
+# }
+
+##
+# Lambda VPC Endpoint for invoking HeimdallPusher lambda
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
+#
+resource "aws_vpc_endpoint" "LambdaVpcEndpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.aws_region}.lambda"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids         = var.subnet_ids
+  security_group_ids = var.security_groups
+
+  private_dns_enabled = true
+
+  tags = {
+    Name = "LambdaVpcEndpoint-${var.deployment_id}"
+  }
 }
 
 ##
@@ -84,7 +104,7 @@ resource "aws_vpc_endpoint" "CloudWatchVpcEndpoint" {
   vpc_endpoint_type = "Interface"
 
   subnet_ids         = var.subnet_ids
-  security_group_ids = [var.security_groups]
+  security_group_ids = var.security_groups
 
   private_dns_enabled = true
 
@@ -105,7 +125,7 @@ resource "aws_vpc_endpoint" "EcrDkrVpcEndpoint" {
   vpc_endpoint_type = "Interface"
 
   subnet_ids         = var.subnet_ids
-  security_group_ids = [var.security_groups]
+  security_group_ids = var.security_groups
 
   private_dns_enabled = true
 
@@ -126,7 +146,7 @@ resource "aws_vpc_endpoint" "EcrApiVpcEndpoint" {
   vpc_endpoint_type = "Interface"
 
   subnet_ids         = var.subnet_ids
-  security_group_ids = [var.security_groups]
+  security_group_ids = var.security_groups
 
   private_dns_enabled = true
 

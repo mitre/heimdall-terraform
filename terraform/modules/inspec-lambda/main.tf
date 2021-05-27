@@ -8,21 +8,6 @@ terraform {
   backend "s3" {}
 }
 
-##
-# S3 bucket for storing versions of the InSpec lambda
-# 
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket
-#
-resource "aws_s3_bucket" "inspec_lambda_code_bucket" {
-  bucket = "inspec-lambda-code-bucket-${var.env}-${var.deployment_id}"
-  acl    = "private"
-
-  tags = {
-    Name        = "inspec-lambda-code-bucket-${var.env}-${var.deployment_id}"
-    Environment = var.env
-  }
-}
-
 # Elastic Container Registry for SAF deployment
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository
@@ -55,22 +40,10 @@ resource "null_resource" "push_image" {
       AWS_ACCOUNT_ID = var.account_id
       IMAGE_FILE     = "serverless-inspec.tar"
       REPO_NAME      = "mitre/serverless-inspec"
-      IMAGE_TAG      = "latest"
+      IMAGE_TAG      = file("${var.function_path}/.version")
     }
   }
 }
-
-##
-# S3 zip file uploaded from local zip that contains the lambda package
-# 
-#
-#
-# resource "aws_s3_bucket_object" "InSpecZip" {
-#   bucket = aws_s3_bucket.inspec_lambda_code_bucket.id
-#   key    = "${filemd5(var.function_zip_path)}.zip"
-#   source = var.function_zip_path
-# }
-
 
 ##
 # InSpec Role to Invoke InSpec Lambda function 
@@ -101,6 +74,25 @@ resource "aws_iam_role" "InSpecRole" {
     ]
   })
 
+  # Allow invoking the HeimdallPusher lambda
+  inline_policy {
+    name = "AllowHeimdallPusherInvoke"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "lambda:InvokeFunction"
+          ]
+          Effect   = "Allow"
+          Resource = var.heimdall_pusher_lambda_arn
+        }
+      ]
+    })
+  }
+
+
   # Allow S3 read access to InSpec profile bucket
   inline_policy {
     name = "S3ProfileAccess"
@@ -113,7 +105,25 @@ resource "aws_iam_role" "InSpecRole" {
             "s3:GetObject"
           ]
           Effect   = "Allow"
-          Resource = var.profileBucketArn
+          Resource = "${var.profiles_bucket_arn}/*"
+        }
+      ]
+    })
+  }
+
+  # Allow S3 write access to InSpec results bucket
+  inline_policy {
+    name = "S3ResultsAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "s3:PutObject"
+          ]
+          Effect   = "Allow"
+          Resource = "${var.results_bucket_arn}/*"
         }
       ]
     })
@@ -171,13 +181,14 @@ module "InSpec" {
   create_role   = false
   lambda_role   = aws_iam_role.InSpecRole.arn
   timeout       = 900
+  memory_size   = 1024
 
   vpc_subnet_ids         = var.subnet_ids
   vpc_security_group_ids = var.security_groups
 
   create_package = false
-  image_uri    = "${var.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/mitre/serverless-inspec:latest"
-  package_type = "Image"
+  image_uri      = "${var.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/mitre/serverless-inspec:${file("${var.function_path}/.version")}"
+  package_type   = "Image"
 
   environment_variables = {
     HOME = "/tmp"

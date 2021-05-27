@@ -23,8 +23,8 @@ variable "function_zip_path" {
   type        = string
 }
 
-variable "ConfigToHdf_security_groups" {
-  description = "The security groups to attach to ConfigToHdf lambda"
+variable "security_groups" {
+  description = "The security groups to attach to lambda"
   type        = list(string)
 }
 
@@ -52,4 +52,9 @@ variable "heimdall_password" {
   description = "The Heimdall user's password used to log in"
   type        = string
   sensitive   = true
+}
+
+variable "results_bucket_id" {
+  description = "The S3 bucket id/name where results will be placed and processed"
+  type        = string
 }

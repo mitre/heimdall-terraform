@@ -51,6 +51,10 @@ dependency "saf-tenant-security-groups" {
 
 dependency "saf-tenant-endpoints" {
   config_path = "../saf-tenant-endpoints"
+
+  mock_outputs = {
+    s3VpcEndpointPrefixListCidr = "0.0.0.0/0"
+  }
 }
 
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
