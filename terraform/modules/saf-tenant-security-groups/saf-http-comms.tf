@@ -10,7 +10,9 @@ resource "aws_security_group" "SafHTTPCommsSG" {
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "SafHTTPCommsSG"
+    Name = "SafHTTPCommsSG",#-${var.deployment_id}",
+    Owner   = basename(data.aws_caller_identity.current.arn),
+    #Project = local.name,
   }
 }
 

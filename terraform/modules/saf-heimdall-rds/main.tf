@@ -29,9 +29,9 @@ resource "aws_db_parameter_group" "heimdall_pg" {
   }
 
   tags = {
-    Name = "${local.name}-heimdall-db-param-group-${var.deployment_id}"
-    #Owner   = "${var.your_name}"
-    Project = local.name
+    Name = "${local.name}-heimdall-db-param-group-${var.deployment_id}",
+    Owner   = basename(data.aws_caller_identity.current.arn),
+    Project = local.name,
   }
 }
 
@@ -45,9 +45,9 @@ resource "aws_db_subnet_group" "heimdall_subg" {
   subnet_ids = var.subnet_ids
 
   tags = {
-    Name = "${local.name}-heimdall-db-sn-group-${var.deployment_id}"
-    #Owner   = "${var.your_name}"
-    Project = local.name
+    Name = "${local.name}-heimdall-db-sn-group-${var.deployment_id}",
+    Owner   = basename(data.aws_caller_identity.current.arn),
+    Project = local.name,
   }
 }
 
@@ -79,9 +79,9 @@ resource "aws_db_instance" "heimdall_db" {
   enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
 
   tags = {
-    Name = "${local.name}-heimdall-rds-db-${var.deployment_id}"
-    #Owner   = "${var.your_name}"
-    Project = local.name
+    Name = "${local.name}-heimdall-rds-db-${var.deployment_id}",
+    Owner   = basename(data.aws_caller_identity.current.arn),
+    Project = local.name,
   }
 }
 
@@ -97,7 +97,9 @@ resource "aws_security_group" "SafRdsSG" {
   vpc_id      = var.vpc_id
 
   tags = {
-    Name = "SafRdsSG-${var.deployment_id}"
+    Name = "SafRdsSG-${var.deployment_id}",
+    Owner   = basename(data.aws_caller_identity.current.arn),
+    Project = local.name,
   }
 }
 
