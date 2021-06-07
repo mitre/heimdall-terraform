@@ -32,5 +32,12 @@ module "vpc" {
 
   # Prevent creation of EIPs for NAT gateways
   reuse_nat_ips = false
+
+  
+  tags = {
+    Name = "${local.name}-${var.deployment_id}",
+    Owner   = basename(data.aws_caller_identity.current.arn),
+    Project = local.name,
+  }
 }
 
