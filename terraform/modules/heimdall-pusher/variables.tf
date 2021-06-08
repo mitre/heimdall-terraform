@@ -23,8 +23,8 @@ variable "function_zip_path" {
   type        = string
 }
 
-variable "ConfigToHdf_security_groups" {
-  description = "The security groups to attach to ConfigToHdf lambda"
+variable "security_groups" {
+  description = "The security groups to attach to lambda"
   type        = list(string)
 }
 
@@ -38,12 +38,23 @@ variable "account_name" {
   default = "missing-account-name"
 }
 
-variable "heimdall_pusher_lambda_arn" {
-  description = "The ARN of the HeimdallPusher lambda function"
+variable "heimdall_url" {
+  description = "The url to the Heimdall server in http://... format"
   type        = string
 }
 
+variable "heimdall_user" {
+  description = "The Heimdall user's email used to log in"
+  type        = string
+}
+
+variable "heimdall_password" {
+  description = "The Heimdall user's password used to log in"
+  type        = string
+  sensitive   = true
+}
+
 variable "results_bucket_id" {
-  description = "The id/name for the InSpec results S3 bucket."
+  description = "The S3 bucket id/name where results will be placed and processed"
   type        = string
 }

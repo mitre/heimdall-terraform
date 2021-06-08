@@ -15,14 +15,14 @@ locals {
   aws_region   = local.region_vars.locals.aws_region
   account_name = local.account_vars.locals.account_name
 
-  exec_multi_path  = abspath("../../../../../lambda/ConfigToHdf/function.zip")
-  exec_single_path = abspath("../../../../../../lambda/ConfigToHdf/function.zip")
+  exec_multi_path  = abspath("../../../../../lambda/HeimdallPusher/function.zip")
+  exec_single_path = abspath("../../../../../../lambda/HeimdallPusher/function.zip")
 }
 
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
 # working directory, into a temporary folder, and execute your Terraform commands in that folder.
 terraform {
-  source = "../../../../../..//terraform/modules/config-to-hdf"
+  source = "../../../../../..//terraform/modules/heimdall-pusher"
 }
 
 dependency "random" {
@@ -76,14 +76,6 @@ dependency "inspec-s3" {
   }
 }
 
-dependency "heimdall-pusher" {
-  config_path = "../heimdall-pusher"
-
-  mock_outputs = {
-    function_arn = "arn:aws-us-gov:iam::123456789000:service/resource"
-  }
-}
-
 
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
@@ -92,12 +84,14 @@ inputs = {
   vpc_id           = dependency.saf-tenant-net.outputs.vpc_id
   subnet_ids       = dependency.saf-tenant-net.outputs.private_subnet_ids
 
-  ConfigToHdf_security_groups       = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
+  security_groups = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
 
   aws_region   = local.aws_region
   account_name = local.account_name
 
-  heimdall_pusher_lambda_arn = dependency.heimdall-pusher.outputs.function_arn
+  heimdall_url      = "http://${dependency.saf-heimdall-alb.outputs.private_alb_address}"
+  heimdall_user     = "HeimdallPusher@example.com"
+  heimdall_password = "foobar"
 
   function_zip_path = fileexists(local.exec_multi_path) ? local.exec_multi_path : local.exec_single_path
 

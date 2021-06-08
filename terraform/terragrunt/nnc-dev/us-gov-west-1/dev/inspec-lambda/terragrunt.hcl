@@ -15,14 +15,16 @@ locals {
   aws_region   = local.region_vars.locals.aws_region
   account_name = local.account_vars.locals.account_name
 
-  exec_multi_path  = abspath("../../../../../lambda/ConfigToHdf/function.zip")
-  exec_single_path = abspath("../../../../../../lambda/ConfigToHdf/function.zip")
+
+  exec_dockerfile_multi_path  = abspath("../../../../../lambda/InSpec/Dockerfile")
+  exec_multi_path  = abspath("../../../../../lambda/InSpec/")
+  exec_single_path = abspath("../../../../../../lambda/InSpec/")
 }
 
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
 # working directory, into a temporary folder, and execute your Terraform commands in that folder.
 terraform {
-  source = "../../../../../..//terraform/modules/config-to-hdf"
+  source = "../../../../../..//terraform/modules/inspec-lambda"
 }
 
 dependency "random" {
@@ -34,7 +36,6 @@ dependency "random" {
   }
 }
 
-# Define any dependencies from other modules 
 dependency "saf-tenant-net" {
   config_path = "../saf-tenant-net"
 
@@ -48,7 +49,8 @@ dependency "saf-tenant-security-groups" {
   config_path = "../saf-tenant-security-groups"
 
   mock_outputs = {
-    SafHTTPCommsSG_id = "temporary-dummy-sg-id"
+    SafHTTPCommsSG_id  = "temporary-dummy-sg-id"
+    SafEgressOnlySG_id = "temporary-dummy-sg-id"
   }
 }
 
@@ -60,19 +62,12 @@ dependency "saf-tenant-endpoints" {
   }
 }
 
-dependency "saf-heimdall-alb" {
-  config_path = "../saf-heimdall-alb"
-
-  mock_outputs = {
-    private_alb_address = "http://nonexistentheimdall.aws.gov"
-  }
-}
-
 dependency "inspec-s3" {
   config_path = "../inspec-s3"
 
   mock_outputs = {
-    inspec_results_bucket_name = "dummy_bucket_name"
+    inspec_profiles_bucket_arn = "arn:aws-us-gov:iam::123456789000:service/resource"
+    inspec_results_bucket_arn  = "arn:aws-us-gov:iam::123456789000:service/resource"
   }
 }
 
@@ -84,22 +79,22 @@ dependency "heimdall-pusher" {
   }
 }
 
-
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
-  deployment_id    = dependency.random.outputs.deployment_id
-  env              = local.env
-  vpc_id           = dependency.saf-tenant-net.outputs.vpc_id
-  subnet_ids       = dependency.saf-tenant-net.outputs.private_subnet_ids
+  env               = local.env
+  aws_region        = local.region_vars.locals.aws_region
+  account_id        = local.account_vars.locals.account_id
+  deployment_id     = dependency.random.outputs.deployment_id
+  subnet_ids        = dependency.saf-tenant-net.outputs.private_subnet_ids
 
-  ConfigToHdf_security_groups       = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
+  security_groups   = [
+    dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id,
+    dependency.saf-tenant-security-groups.outputs.SafEgressOnlySG_id
+  ]
+  function_path = fileexists(local.exec_dockerfile_multi_path) ? local.exec_multi_path : local.exec_single_path
 
-  aws_region   = local.aws_region
-  account_name = local.account_name
+  profiles_bucket_arn = dependency.inspec-s3.outputs.inspec_profiles_bucket_arn
+  results_bucket_arn  = dependency.inspec-s3.outputs.inspec_results_bucket_arn
 
   heimdall_pusher_lambda_arn = dependency.heimdall-pusher.outputs.function_arn
-
-  function_zip_path = fileexists(local.exec_multi_path) ? local.exec_multi_path : local.exec_single_path
-
-  results_bucket_id = dependency.inspec-s3.outputs.inspec_results_bucket_name
 }
