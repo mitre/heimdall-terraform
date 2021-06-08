@@ -57,13 +57,14 @@ def process_record(event, bucket_name, object_key)
   record_contents = get_record_contents(bucket_name, object_key)
   hdf = record_contents['data']
   filename = object_key.split('/').last
+  $logger.info("Processing file (#{object_key}) with filename (#{filename})")
 
   record_contents['eval_tags'] = record_contents['eval_tags'].nil? ? 'HeimdallPusher' : record_contents['eval_tags'] + ',HeimdallPusher'
 
   # Save to Heimdall
   heimdall_user_password = get_heimdall_password
   user_id, token = get_heimdall_api_token(heimdall_user_password)
-  push_to_heimdall(hdf, user_id, token, record_contents['eval_tags'])
+  push_to_heimdall(filename, hdf, user_id, token, record_contents['eval_tags'])
 
   # Save to S3
   save_results_to_bucket(record_contents, bucket_name, filename)
@@ -201,10 +202,9 @@ end
 #   -H "Authorization: Bearer <token>" \
 #   "http://my-heimdall/evaluations"
 #
-def push_to_heimdall(hdf, user_id, token, eval_tags)
+def push_to_heimdall(filename, hdf, user_id, token, eval_tags)
   $logger.info('Pushing HDF results to Heimdall Server...')
   url = URI("#{ENV['HEIMDALL_URL']}/evaluations")
-  filename = "AWS-Config-Results-#{Time.now.utc.iso8601}"
   payload = {
     'data': UploadIO.new(StringIO.new(hdf.to_json), 'application/json', filename),
     'filename': filename,

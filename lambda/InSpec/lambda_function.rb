@@ -57,6 +57,9 @@ def lambda_handler(event:, context:)
   $logger.info('Running InSpec.')
   runner.run
 
+  # Push the results to S3
+  # Consider allowing passing additional eval_tags through the event
+  # Consider tagging with the account ID
   s3_client = Aws::S3::Client.new
   s3_client.put_object({
     body: StringIO.new({

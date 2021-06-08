@@ -67,7 +67,7 @@ dependency "inspec-s3" {
 
   mock_outputs = {
     inspec_profiles_bucket_arn = "arn:aws-us-gov:iam::123456789000:service/resource"
-    inspec_results_bucket_arn = "arn:aws-us-gov:iam::123456789000:service/resource"
+    inspec_results_bucket_arn  = "arn:aws-us-gov:iam::123456789000:service/resource"
   }
 }
 
@@ -85,15 +85,16 @@ inputs = {
   aws_region        = local.region_vars.locals.aws_region
   account_id        = local.account_vars.locals.account_id
   deployment_id     = dependency.random.outputs.deployment_id
-  profileBucketArn  = dependency.inspec-s3.outputs.inspec_profiles_bucket_arn
   subnet_ids        = dependency.saf-tenant-net.outputs.private_subnet_ids
+
   security_groups   = [
     dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id,
     dependency.saf-tenant-security-groups.outputs.SafEgressOnlySG_id
   ]
   function_path = fileexists(local.exec_dockerfile_multi_path) ? local.exec_multi_path : local.exec_single_path
 
-  profiles_bucket_arn = dependency.inspec-s3.outputs.inspec_profile_bucket_arn
+  profiles_bucket_arn = dependency.inspec-s3.outputs.inspec_profiles_bucket_arn
+  results_bucket_arn  = dependency.inspec-s3.outputs.inspec_results_bucket_arn
 
-  results_bucket_arn = dependency.inspec-s3.outputs.inspec_results_bucket_arn
+  heimdall_pusher_lambda_arn = dependency.heimdall-pusher.outputs.function_arn
 }

@@ -57,18 +57,17 @@ def lambda_handler(event:, context:)
   results_bucket = event.nil? ? nil : event['results_bucket']
   results_bucket ||= ENV['results_bucket']
   filename = "#{Time.now.strftime("%Y-%m-%d_%H-%M-%S")}_ConfigToHdf.json"
-  unless results_bucket.nil?
-    $logger.info('Pushing results to S3')
-    s3_client = Aws::S3::Client.new
-    s3_client.put_object({
-      body: StringIO.new({
-        "data" => hdf_hash,
-        "eval_tags" => "ConfigToHdf"
-      }.to_json), 
-      bucket: results_bucket, 
-      key: "unprocessed/#{filename}", 
-    }) 
-  end
+  # Consider tagging with the account ID
+  $logger.info('Pushing results to S3')
+  s3_client = Aws::S3::Client.new
+  s3_client.put_object({
+    body: StringIO.new({
+      "data" => hdf_hash,
+      "eval_tags" => "ConfigToHdf"
+    }.to_json), 
+    bucket: results_bucket, 
+    key: "unprocessed/#{filename}", 
+  }) unless results_bucket.nil?
 
   $logger.info('Lambda completed successfully!')
 end

@@ -40,3 +40,8 @@ variable "function_path" {
   description = "The local file path to the lambda."
   type        = string
 }
+
+variable "heimdall_pusher_lambda_arn" {
+  description = "The arn for the heimdall_pusher_lambda function"
+  type = string
+}

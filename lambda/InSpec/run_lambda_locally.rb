@@ -33,7 +33,7 @@ lambda_handler(
     },
     "profile_common_name" => "redhat-enterprise-linux-7-stig-baseline-master",
     "config" => {
-      "target" => "ssh://ec2-user@i-09f17fd0396d9c6f7",
+      "target" => "ssh://ec2-user@i-00f1868f8f3b4eb03",
       "input_file" => {
         "bucket" => "inspec-profiles-bucket-dev-myzr",
         "key" => "rhel7-stig-baseline-master-disable-slow-controls.yml"
@@ -65,23 +65,26 @@ lambda_handler(
 # }
 
 {
-    "heimdall_pusher_lambda": "HeimdallPusher-myzr",
-    "ssh_key_ssm_param": "test-ssh-key",
+    "results_bucket": "inspec-results-bucket-dev-28wd",
+    "heimdall_pusher_lambda": "HeimdallPusher-28wd",
+    "ssh_key_ssm_param": "/inspec/test-ssh-key",
     "profile": {
-      "bucket": "inspec-profiles-bucket-dev-myzr",
+      "bucket": "inspec-profiles-bucket-dev-28wd",
       "key": "redhat-enterprise-linux-7-stig-baseline-master.zip"
     },
     "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
     "config": {
-      "target": "ssh://ec2-user@ec2-160-1-122-76.us-gov-west-1.compute.amazonaws.com",
+      "target": "ssh://ec2-user@ec2-15-200-235-74.us-gov-west-1.compute.amazonaws.com",
       "sudo": true,
       "input_file": {
-        "bucket": "inspec-profiles-bucket-dev-myzr",
+        "bucket": "inspec-profiles-bucket-dev-28wd",
         "key": "rhel7-stig-baseline-master-disable-slow-controls.yml"
       }
     }
 }
 
+i-00f1868f8f3b4eb03
+ec2-15-200-235-74.us-gov-west-1.compute.amazonaws.com
 
 
 # lambda_handler(
