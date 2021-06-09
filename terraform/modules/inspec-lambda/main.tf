@@ -54,9 +54,12 @@ resource "aws_iam_role" "InSpecRole" {
   name = "InSpecRole-${var.deployment_id}"
 
   # Allow execution of the lambda function
+  # User: arn:aws-us-gov:sts::675609379314:assumed-role/InSpecRole-28wd/InSpec-28wd is not authorized to perform: iam:ListPolicies on resource: policy path /
+  # Should NOT have AWS Config Write access
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
-    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
+    "arn:aws-us-gov:iam::aws:policy/service-role/AWSConfigRole"
   ]
 
   # Allow assume role permission for lambda

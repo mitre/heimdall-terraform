@@ -5,36 +5,14 @@ require 'aws-sdk-s3'
 require 'json'
 require 'inspec'
 require 'logger'
-# require 'byebug'
-# require 'aws-sdk'
 
 puts "RUBY_VERSION: #{RUBY_VERSION}"
 $logger = Logger.new($stdout)
 
 ##
+# Entrypoint for the Serverless InSpec lambda functoin
 #
-# https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-install-plugin.html#install-plugin-macos
-#   curl "https://s3.amazonaws.com/session-manager-downloads/plugin/latest/mac/sessionmanager-bundle.zip" -o "sessionmanager-bundle.zip"
-#   unzip sessionmanager-bundle.zip
-#   sudo ./sessionmanager-bundle/install -i /usr/local/sessionmanagerplugin -b /usr/local/bin/session-manager-plugin
-#   rm -rf ./sessionmanager-bundle 
-#   rm -f sessionmanager-bundle.zip
-#
-# https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started-enable-ssh-connections.html
-#
-# `~/.ssh/config`
-#   host i-* mi-*
-#       ProxyCommand sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'"
-#   ssh -i ~/.ssh/id_rsa ec2-user@i-09f17fd0396d9c6f7
-#   ssh -i ~/.ssh/id_rsa -o ProxyCommand="sh -c \"aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters 'portNumber=%p'\"" ec2-user@i-09f17fd0396d9c6f7
-#
-# https://docs.chef.io/inspec/config/
-#
-# InSpec Exec allows several ways of specifying the profile that you want to execute.
-#   - Local folder
-#   - GitHub SSH & HTTPS
-#   - Web hosted ZIP file
-#   - (https://docs.chef.io/inspec/cli/#exec)
+# See the README for more information
 #
 def lambda_handler(event:, context:)
   # Set export filename
@@ -58,6 +36,7 @@ def lambda_handler(event:, context:)
   runner.run
 
   # Push the results to S3
+  # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Client.html
   # Consider allowing passing additional eval_tags through the event
   # Consider tagging with the account ID
   s3_client = Aws::S3::Client.new
@@ -71,6 +50,11 @@ def lambda_handler(event:, context:)
   }) unless event['results_bucket'].nil?
 end
 
+def get_account_id(context)
+  aws_account_id = context.invoked_function_arn.split(":")[4]
+  /^\d{12}$/.match?(aws_account_id)  ? aws_account_id : nil
+end
+
 ##
 # Generates the configuration that will be used for the InSpec execution
 #
@@ -78,6 +62,7 @@ def build_config(event, file_path)
   # Download S3 files if needed
   handle_s3_profile(event)
   handle_s3_input_file(event)
+  handle_secure_string_input_file(event)
 
   # Start with a default config and merge in the config that was passed into the lambda
   config = default_config.merge(event['config'] || {}).merge(forced_config(file_path))
@@ -120,13 +105,16 @@ def handle_s3_profile(event)
 end
 
 ##
-# If "input_file" is located in an S3 bucket (notated by "profile" being a hash)
+# If "input_file" is located in an S3 bucket 
+# (notated by "bucket" and "key" being present in the "input_file" parameter),
 # then we need to fetch the file and download it to /tmp/
 #
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Client.html
 #
 def handle_s3_input_file(event)
-  return unless event.dig("config", "input_file").is_a? Hash
+  bucket = event.dig("config", "input_file", "bucket")
+  key = event.dig("config", "input_file", "key")
+  return if bucket.nil? || key.nil?
 
   input_file_download_path = '/tmp/inspec-input_file.yml'
   $logger.info("Downloading InSpec input_file to #{input_file_download_path}")
@@ -137,6 +125,40 @@ def handle_s3_input_file(event)
   )
 
   event["config"]["input_file"] = [input_file_download_path]
+end
+
+##
+# If "input_file" is located inside of an SSM SecureString parameter
+# (notated by "ssm_secure_string" being present in the "input_file" parameter),
+# then we need to fetch & decrypt the parameter and save it to /tmp/input_file.yml
+#
+# https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/SSM/Client.html
+#
+def handle_secure_string_input_file(event)
+  param = event.dig("config", "input_file", "ssm_secure_string")
+  return if param.nil?
+
+  # Either use the default client or a specified endpoint
+  ssm_client = nil
+  if ENV['SSM_ENDPOINT'].nil?
+    $logger.info("Using default SSM Parameter Store endpoint.")
+    ssm_client = Aws::SSM::Client.new
+  else
+    endpoint = "https://#{/vpce.+/.match(ENV['SSM_ENDPOINT'])[0]}"
+    $logger.info("Using SSM Parameter Store endpoint: #{endpoint}")
+    ssm_client = Aws::SSM::Client.new(endpoint: endpoint)
+  end
+
+  # Fetch and save the input_file
+  resp = ssm_client.get_parameter({
+    name: param,
+    with_decryption: true,
+  })
+  file_path = '/tmp/input_file.yml'
+  File.write(file_path, resp.parameter.value)
+
+  # Update the event with the input_file
+  event["config"]["input_file"] = [file_path]
 end
 
 ##

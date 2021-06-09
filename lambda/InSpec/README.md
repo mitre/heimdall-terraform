@@ -116,12 +116,24 @@ If the bucket is not public, you must provide the proper permissions to the lamb
 You can read more about InSpec inputs [here](https://docs.chef.io/inspec/inputs/)
 
 #### File on S3 Bucket
+Note that you must ensure that the lambda's IAM role has permissions to get objects for the specified bucket.
 ```json
 {
   ...
   "config": {
     "bucket": "inspec-profiles-bucket",
     "key": "input_files/custom-inspec.yml"
+  }
+}
+```
+
+#### SecureString SSM Parameter
+Note that you must ensure that the lambda's IAM role has permission to the parameter as well as its KMS key to properly fetch & decrypt.
+```json
+{
+  ...
+  "config": {
+    "ssm_secure_string": "inspec/input_file/param"
   }
 }
 ```
