@@ -28,18 +28,16 @@ require_relative 'lambda_function'
 lambda_handler(
   event: {
     "results_bucket" => "inspec-results-bucket-dev-28wd",
-    "ssh_key_ssm_param" => "/inspec/test-ssh-key",
-    "profile" => "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
-    "profile_common_name" => "redhat-enterprise-linux-7-stig-baseline-master",
+    "profile" => "https://github.com/mitre/microsoft-windows-server-2019-stig-baseline.git",
+    "profile_common_name" => "microsoft-windows-server-2019-stig-baseline",
     "config" => {
-      "target" => "ssh://ec2-user@i-00f1868f8f3b4eb03",
-      "input" => [
-        "disable_slow_controls=true"
-      ],
-      "sudo" => true
+      "target" => "winrm://i-0e35ab216355084ee", #ec2-160-1-5-36.us-gov-west-1.compute.amazonaws.com
+      "user" => "Administrator",
+      "password" => {
+        "instance_id" => "i-0e35ab216355084ee",
+        "launch_key" => "/inspec/test-ssh-key"
+      }
     }
   },
   context: nil
 )
-
-

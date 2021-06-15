@@ -72,7 +72,7 @@ Note that you aren't limited to just scanning AWS resources, as long as the lamb
 ```
 
 ### How can I specify which profile to execute?
-Profile sources are documented by InSpec [here](https://docs.chef.io/inspec/cli/#exec) - .
+Profile sources are documented by InSpec [here](https://docs.chef.io/inspec/cli/#exec).
 
 #### Zipped folder on S3 Bucket
 In addition to what is already allowed by the vanilla InSpec exec command, you are able to specify a file from an AWS bucket that may be private that the lambda has permissions to access via the AWS API.
@@ -104,13 +104,22 @@ If the bucket is not public, you must provide the proper permissions to the lamb
 }
 ```
 
-### Chef Supermarket
+#### Chef Supermarket
 (This hasn't been tested yet!)
 ```json
 {
   ...
   "profile": "supermarket://username/linux-baseline"
 }
+```
+
+### How can I run profiles with dependencies in an offline environment?
+The recommendation for offline environments is to save vendored InSpec profiles to an S3 bucket.
+
+```bash
+git clone git@github.com:mitre/aws-foundations-cis-baseline.git
+inspec vendor ./aws-foundations-cis-baseline && inspec archive ./aws-foundations-cis-baseline
+# Then upload ./aws-foundations-cis-baseline.tar.gz to you S3 bucket
 ```
 
 ### How can I specify `--input-file`?
@@ -161,7 +170,12 @@ Note that you must ensure that the lambda's IAM role has permission to the param
 {
   "ssh_key_ssm_param": "/inspec/test-ssh-key", // --key-files / -ia
   "config": {
+    "user": "username", // --user
+    "self_signed": true, // --self-signed
     "sudo": true, // --sudo
+    "bastion_host": "BASTION_HOST", // --bastion-host
+    "bastion_port": "BASTION_PORT", // --bastion-port
+    "bastion_user": "BASTION_USER" // --bastion-user
   }
 }
 ```
@@ -187,23 +201,6 @@ Note that if you are running InSpec AWS scans, then the lambda's IAM profile mus
 }
 ```
 
-### RedHat 7 STIG Baseline (SSH via SSM)
-```json
-{
-  "results_bucket": "inspec-results-bucket-dev-28wd",
-  "ssh_key_ssm_param": "/inspec/test-ssh-key",
-  "profile": "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
-  "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
-  "config": {
-    "target": "ssh://ec2-user@i-00f1868f8f3b4eb03",
-    "input": [
-      "disable_slow_controls=true"
-    ],
-    "sudo": true
-  }
-}
-```
-
 ### RedHat 7 STIG Baseline (SSH)
 ```json
 {
@@ -225,9 +222,62 @@ Note that if you are running InSpec AWS scans, then the lambda's IAM profile mus
 }
 ```
 
+### RedHat 7 STIG Baseline (SSH via SSM)
+The difference with this example and the one above is that the `target` is the instance ID of the EC2 instance. This tells the lambda to use a [SSM SSH connection](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-getting-started-enable-ssh-connections.html) to tunnel the SSH connection. This is particularly useful if there is not direct network access to the EC2 isntance, but both the lambda and EC2 instance have access to SSM. Note that this also requires that your EC2 instance be a SSM managed instance.
+```json
+{
+  "results_bucket": "inspec-results-bucket-dev-28wd",
+  "ssh_key_ssm_param": "/inspec/test-ssh-key",
+  "profile": "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
+  "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
+  "config": {
+    "target": "ssh://ec2-user@i-00f1868f8f3b4eb03",
+    "input": [
+      "disable_slow_controls=true"
+    ],
+    "sudo": true
+  }
+}
+```
+
 ### PostgreSQL 12 STIG Baseline (TODO)
 ```json
 "https://github.com/mitre/aws-rds-crunchy-data-postgresql-9-stig-baseline"
+```
+
+### Windows Server 2019 STIG Baseline (WinRM)
+```json
+{
+  "results_bucket": "inspec-results-bucket-dev-28wd",
+  "profile": "https://github.com/mitre/microsoft-windows-server-2019-stig-baseline.git",
+  "profile_common_name": "microsoft-windows-server-2019-stig-baseline",
+  "config": {
+    "target": "winrm://ec2-160-1-5-36.us-gov-west-1.compute.amazonaws.com",
+    "user": "Administrator",
+    "password": {
+      "instance_id": "i-0e35ab216355084ee",
+      "launch_key": "/inspec/test-ssh-key"
+    }
+  }
+}
+```
+
+### Windows Server 2019 STIG Baseline (WinRM via SSM Port Forwarding)
+The difference with this example and the one above is that the `target` is the instance ID of the EC2 instance. This tells the lambda to use [SSM port forwarding](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html) to tunnel the WinRM connection. This is particularly useful if there is not direct network access to the EC2 isntance, but both the lambda and EC2 instance have access to SSM. Note that this also requires that your EC2 instance be a SSM managed instance.
+```json
+{
+  "results_bucket": "inspec-results-bucket-dev-28wd",
+  "profile": "https://github.com/mitre/microsoft-windows-server-2019-stig-baseline.git",
+  "profile_common_name": "microsoft-windows-server-2019-stig-baseline",
+  "config": {
+    "target": "winrm://i-0e35ab216355084ee",
+    "user": "Administrator",
+    "password": {
+      "instance_id": "i-0e35ab216355084ee",
+      "launch_key": "/inspec/test-ssh-key"
+    }
+  }
+}
 ```
 
 ## Scheduling Recurring Scans

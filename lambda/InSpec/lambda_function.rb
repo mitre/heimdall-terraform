@@ -73,7 +73,8 @@ end
 # Generates the configuration that will be used for the InSpec execution
 #
 def build_config(event, file_path)
-  # Download S3 files if needed
+  # Call all builder helpers for various special configuration cases
+  handle_winrm_password(event)
   handle_s3_profile(event)
   handle_s3_input_file(event)
   handle_secure_string_input_file(event)
@@ -87,13 +88,43 @@ def build_config(event, file_path)
 
   if /ssh:\/\/.+@m?i-[a-z0-9]{17}/.match? config['target'] 
     $logger.info('Using proxy SSM session to SSH to managed EC2 instance.')
-    # debugging puts, remove later
-    puts `sh -c "aws ssm start-session --target i-09f17fd0396d9c6f7 --document-name AWS-StartSSHSession --parameters portNumber=22"`
     config["proxy_command"] = 'sh -c "aws ssm start-session --target %h --document-name AWS-StartSSHSession --parameters portNumber=%p"'
+  end
+
+  if /winrm:\/\/m?i-[a-z0-9]{17}/.match? config['target']
+    $logger.info('Using port forwarded SSM session to WINRM to managed EC2 instance.')
+    instance_id = /m?i-[a-z0-9]{17}/.match(config['target'])[0]
+    Process.detach(spawn("aws ssm start-session --target #{instance_id} --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"5985\"], \"localPortNumber\":[\"5985\"]}'"))
+    Process.detach(spawn("aws ssm start-session --target #{instance_id} --document-name AWS-StartPortForwardingSession --parameters '{\"portNumber\":[\"5986\"], \"localPortNumber\":[\"5986\"]}'"))
+    config['target'] = 'winrm://localhost'
+    $logger.info('Waiting 30 seconds.')
+    sleep(30)
   end
 
   $logger.info("Built config: #{config}")
   config
+end
+
+##
+# AWS EC2 Windows instances may have their password saved and encrypted with an SSH key.
+#
+# If the config password is a hash with 'instance_id' and 'launch_key' atttributes, then
+# this method will attempt to fetch and decrypt the password, then set the password 
+# attribute properly.
+#
+def handle_winrm_password(event)
+  instance_id = event.safe_dig('config', 'password', 'instance_id')
+  launch_key = event.safe_dig('config', 'password', 'launch_key')
+  return if instance_id.nil? || launch_key.nil?
+
+  $logger.info('Fetching winrm password for authentication.')
+  file_path = '/tmp/launch_key'
+  File.write(file_path, fetch_ssm_param(launch_key))
+
+  password = JSON.parse(`aws ec2 get-password-data --instance-id #{instance_id} --priv-launch-key #{file_path}`)['PasswordData']
+  event['config']['password'] = password
+rescue
+  return nil
 end
 
 ##
@@ -107,8 +138,8 @@ def handle_s3_profile(event)
   key = event.safe_dig("profile", "key")
   return if bucket.nil? || key.nil?
 
-  unless key.end_with? '.zip'
-    $logger.error 'InSpec profiles from S3 are only supported as ZIP files!'
+  unless key.end_with?('.zip') || key.end_with?('.tar.gz')
+    $logger.error 'InSpec profiles from S3 are only supported as *.zip or *.tar.gz files!'
     exit 1
   end
 
@@ -154,6 +185,17 @@ def handle_secure_string_input_file(event)
   param = event.safe_dig("config", "input_file", "ssm_secure_string")
   return if param.nil?
 
+  file_path = '/tmp/input_file.yml'
+  File.write(file_path, fetch_ssm_param(param))
+
+  # Update the event with the input_file
+  event["config"]["input_file"] = [file_path]
+end
+
+##
+# Helper to fetch and return an SSM parameter.
+#
+def fetch_ssm_param(param)
   # Either use the default client or a specified endpoint
   ssm_client = nil
   if ENV['SSM_ENDPOINT'].nil?
@@ -165,17 +207,13 @@ def handle_secure_string_input_file(event)
     ssm_client = Aws::SSM::Client.new(endpoint: endpoint)
   end
 
-  # Fetch and save the input_file
+  # Fetch and return the parameter
   resp = ssm_client.get_parameter({
     name: param,
     with_decryption: true,
   })
-  file_path = '/tmp/input_file.yml'
-  File.write(file_path, resp.parameter.value)
-  $logger.info("Got input file from #{param} SSM Parameter.")
-
-  # Update the event with the input_file
-  event["config"]["input_file"] = [file_path]
+  $logger.info("Successfully fetched #{param} SSM Parameter.")
+  resp.parameter.value
 end
 
 ##

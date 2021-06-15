@@ -151,6 +151,24 @@ resource "aws_iam_role" "InSpecRole" {
     })
   }
 
+  # Allow EC2 get password data for fetching WinRM credentials
+  inline_policy {
+    name = "EC2GetPasswordDataAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "ec2:GetPasswordData"
+          ]
+          Effect   = "Allow"
+          Resource = "*" # consider locking this down to a subpath
+        }
+      ]
+    })
+  }
+
   inline_policy {
     name = "AllowHeimdallPassKmsKeyDecrypt"
 
