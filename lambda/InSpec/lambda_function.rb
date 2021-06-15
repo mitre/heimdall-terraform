@@ -10,6 +10,20 @@ puts "RUBY_VERSION: #{RUBY_VERSION}"
 $logger = Logger.new($stdout)
 
 ##
+# The vanilla `dig` method will throw an exception if it hits a non-hash object
+# and still has more levels to dig - for example: { a: 'test' }.dig(:a, :b, :c).
+# 
+# The `safe_dig` method will just return nil if `dig` throws an exception.
+#
+class Hash
+  def safe_dig(*args)
+    return dig(*args)
+  rescue
+    return nil
+  end
+end
+
+##
 # Entrypoint for the Serverless InSpec lambda functoin
 #
 # See the README for more information
@@ -29,7 +43,7 @@ def lambda_handler(event:, context:)
 
   # Set InSpec Target
   $logger.info('Adding InSpec target.')
-  runner.add_target(event["profile"], config)
+  runner.add_target(event["profile"])
 
   # Trigger InSpec Scan
   $logger.info('Running InSpec.')
@@ -89,9 +103,11 @@ end
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Client.html
 #
 def handle_s3_profile(event)
-  return unless event["profile"].is_a? Hash
+  bucket = event.safe_dig("profile", "bucket")
+  key = event.safe_dig("profile", "key")
+  return if bucket.nil? || key.nil?
 
-  unless event.dig("profile", "key").end_with? '.zip'
+  unless key.end_with? '.zip'
     $logger.error 'InSpec profiles from S3 are only supported as ZIP files!'
     exit 1
   end
@@ -99,7 +115,7 @@ def handle_s3_profile(event)
   profile_download_path = '/tmp/inspec-profile.zip'
   $logger.info("Downloading InSpec profile to #{profile_download_path}")
   s3 = Aws::S3::Client.new
-  s3.get_object({ bucket: event["profile"]["bucket"], key: event["profile"]["key"] }, target: profile_download_path)
+  s3.get_object({ bucket: bucket, key: key }, target: profile_download_path)
 
   event["profile"] = profile_download_path
 end
@@ -112,11 +128,11 @@ end
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/S3/Client.html
 #
 def handle_s3_input_file(event)
-  bucket = event.dig("config", "input_file", "bucket")
-  key = event.dig("config", "input_file", "key")
+  bucket = event.safe_dig("config", "input_file", "bucket")
+  key = event.safe_dig("config", "input_file", "key")
   return if bucket.nil? || key.nil?
 
-  input_file_download_path = '/tmp/inspec-input_file.yml'
+  input_file_download_path = '/tmp/input_file.yml'
   $logger.info("Downloading InSpec input_file to #{input_file_download_path}")
   s3 = Aws::S3::Client.new
   s3.get_object(
@@ -135,7 +151,7 @@ end
 # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/SSM/Client.html
 #
 def handle_secure_string_input_file(event)
-  param = event.dig("config", "input_file", "ssm_secure_string")
+  param = event.safe_dig("config", "input_file", "ssm_secure_string")
   return if param.nil?
 
   # Either use the default client or a specified endpoint
@@ -156,6 +172,7 @@ def handle_secure_string_input_file(event)
   })
   file_path = '/tmp/input_file.yml'
   File.write(file_path, resp.parameter.value)
+  $logger.info("Got input file from #{param} SSM Parameter.")
 
   # Update the event with the input_file
   event["config"]["input_file"] = [file_path]
@@ -171,6 +188,7 @@ end
 #
 # Returns:
 # - nil if no key has been fetched, or path to key if downloaded.
+#
 def fetch_ssh_key(ssh_key_ssm_param)
   if ssh_key_ssm_param.nil? || ssh_key_ssm_param.empty?
     $logger.info('ssh_key_ssm_param is blank. Will not fetch SSH key.')

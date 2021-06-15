@@ -3,37 +3,38 @@
 This lambda function is meant to allow you to execute InSpec profiles in a serverless fashion. It strives to be as similar as it can be to how you would normally run `inspec exec` on your CLI, while also adding some useful functionality specific to AWS.
 
 ## Event Parameters 
-```json
+```javascript
 {
   "results_bucket":      "<The bucket to store the scan results to>",
   "profile":             "<url or alternate configuration for the source InSpec profile>",
-  "ssh_key_ssm_param":   "inspec/<path to SSM secure string parameter that stores private key material>",
+  "ssh_key_ssm_param":   "<path to SSM secure string parameter that stores private key material>",
   "profile_common_name": "<The 'common name' of the InSpec profile that will be used in filenames>",
-  "config": { // This is the direct InSpec Configuration (this example section non-exhaustive - see below)
+  "config": { // This is the direct InSpec Configuration (this example section is NON-EXHAUSTIVE - see below)
     "target":     "<The target to run the profile against>",
     "sudo":       "<Indicates if can use sudo as the logged in user>",
-    "input_file": "<location of an alternative inspec.yml configuration file for the profile>",
-    "key_files":  "<A local key file to use when starting SSH session>"
+    "input_file": "<Location of an alternative inspec.yml configuration file for the profile>",
+    "input": ["<:ist of aribtrary inputs for the profile>"],
+    "key_files":  "<A local key file to use when starting SSH session>",
   }
 }
 ```
 
 ### Where Do The Results Go?
 If you DO NOT specify the `results_bucket` parameter in the lambda event, then the results will just be logged to CloudWatch. If you DO specify the `results_bucket` parameter in the lambda event, then the lambda will attempt to save the results JSON to the S3 bucket under `unprocessed/*`. The format of the JSON is meant to be a incomplete API call to push results to a Heimdall Server and looks like this:
-```json
+```javascript
 {
   "data": {}, // this contains the HDF results
   "eval_tags": "ServerlessInspec"
 }
 ```
 
-### What can I put in the 'target' argument?
-If you omit the `config['target']` argument, then InSpec will attempt to execute the profile against the lambda itself.
-
 ### How Do I Store and Specify an SSH Key for a Scan?
 SSH keys for this lambda are expected to be stored in an Secure String parameter within Systems Manager's Parameter Store. Note that if you are trying to scan against an AWS-provided EC2 instance, then you will likely want to save the public key material to `/ec2-user/.ssh/authorized_keys` on the instance.
 
 If you are encrypting the Secure String parameter with something other than the default KMS key (this is recommended), then you will need to ensure that the lambda's IAM role has permissions to execute `kms:Decrypt` against your KMS key.
+
+### How can I specify `--target`? 
+If you omit the `config['target']` argument, then InSpec will attempt to execute the profile against the lambda itself.
 
 #### SSM Managed EC2 Instance
 One additional feature that this lambda provides on top of standard InSpec is that it allows you to establish an SSH session for an InSpec scan tunneled through an SSM managed instance session. This is especially useful if the lambda does not have direct network access to its target, but can have a connection through SSM. You can read more about SSM Managed Instance sessions [here](https://docs.aws.amazon.com/systems-manager/latest/userguide/session-manager-working-with-sessions-start.html)
@@ -70,7 +71,7 @@ Note that you aren't limited to just scanning AWS resources, as long as the lamb
 }
 ```
 
-### What Kind of Profile Sources Can I Specify?
+### How can I specify which profile to execute?
 Profile sources are documented by InSpec [here](https://docs.chef.io/inspec/cli/#exec) - .
 
 #### Zipped folder on S3 Bucket
@@ -112,7 +113,7 @@ If the bucket is not public, you must provide the proper permissions to the lamb
 }
 ```
 
-### What Kind of Input File (inspec.yml) Sources Can I Specify?
+### How can I specify `--input-file`?
 You can read more about InSpec inputs [here](https://docs.chef.io/inspec/inputs/)
 
 #### File on S3 Bucket
@@ -133,17 +134,42 @@ Note that you must ensure that the lambda's IAM role has permission to the param
 {
   ...
   "config": {
-    "ssm_secure_string": "inspec/input_file/param"
+    "input_file": {
+      "ssm_secure_string": "inspec/input_file/param"
+    }
   }
 }
 ```
 
-### (Consider allowing input files to be stored in a SSM Secure String Parameter)
+### How can I Specify `--input`?
+
+```json
+{
+  ...
+  "config": {
+    "input": [
+      "disable_slow_controls=true",
+      "other_input=value"
+    ]
+  }
+}
+```
+
+### What other kinds of configurations can I specify?
+
+```javascript
+{
+  "ssh_key_ssm_param": "/inspec/test-ssh-key", // --key-files / -ia
+  "config": {
+    "sudo": true, // --sudo
+  }
+}
+```
 
 ### Where Can I Read More about the InSpec Config?
 You can read more about InSpec configuraitons [here](https://docs.chef.io/inspec/config/) and about InSpec reporters [here](https://docs.chef.io/inspec/reporters/). There are some configuration items that are always overridden so that the lambda can work properly - like the reporter, logger, and type.
 
-InSpec doesn't necessarily document the configuration futher than this (to aid easier use of InSpec from Ruby code and not the CLI). The workaround for this was to add an interactive debugger (or even just a `puts conf` statement) to the InSpec Runner source code on a local develeopment machine (found under `/<gem source>/inspec-core-4.37.17/lib/runner.rb#initialize`). Once the interactive debugger is in place, you can specify InSpec CLI commands as you normally would and view how the configuration is affected. You can find the location of the inspec gem source by running `gem which inspec`.
+InSpec doesn't necessarily document the configuration futher than this (to aid easier use of InSpec from Ruby code and not the CLI). The workaround for this was to add an interactive debugger (or even just a `puts conf` statement) to the InSpec Runner source code on a local develeopment machine (found under `/<gem source>/inspec-core-4.37.17/lib/inspec/runner.rb#initialize`). Once the interactive debugger is in place, you can specify InSpec CLI commands as you normally would and view how the configuration is affected. You can find the location of the inspec gem source by running `gem which inspec`.
 
 ## Scan Examples
 These are examples of the JSON that can be passed into the lambda event to obtain a successful scan.
@@ -152,47 +178,50 @@ These are examples of the JSON that can be passed into the lambda event to obtai
 Note that if you are running InSpec AWS scans, then the lambda's IAM profile must have suffient permissions to analyze your environment.
 ```json
 {
-    "results_bucket": "inspec-results-bucket-dev-28wd",
-    "profile": "https://github.com/mitre/aws-foundations-cis-baseline/archive/refs/heads/master.zip",
-    "profile_common_name": "demo-aws-baseline-master",
-    "config": {
-      "target": "aws://"
-    }
+  "results_bucket": "inspec-results-bucket-dev-28wd",
+  "profile": "https://github.com/mitre/aws-foundations-cis-baseline/archive/refs/heads/master.zip",
+  "profile_common_name": "demo-aws-baseline-master",
+  "config": {
+    "target": "aws://"
+  }
 }
 ```
 
 ### RedHat 7 STIG Baseline (SSH via SSM)
 ```json
 {
-    "results_bucket": "inspec-results-bucket-dev-28wd",
-    "ssh_key_ssm_param": "/inspec/test-ssh-key",
-    "profile": "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
-    "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
-    "config": {
-      "target": "ssh://ec2-user@i-00f1868f8f3b4eb03",
-      "sudo": true
-    }
+  "results_bucket": "inspec-results-bucket-dev-28wd",
+  "ssh_key_ssm_param": "/inspec/test-ssh-key",
+  "profile": "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
+  "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
+  "config": {
+    "target": "ssh://ec2-user@i-00f1868f8f3b4eb03",
+    "input": [
+      "disable_slow_controls=true"
+    ],
+    "sudo": true
+  }
 }
 ```
 
 ### RedHat 7 STIG Baseline (SSH)
 ```json
 {
-    "results_bucket": "inspec-results-bucket-dev-28wd",
-    "ssh_key_ssm_param": "/inspec/test-ssh-key",
-    "profile": {
+  "results_bucket": "inspec-results-bucket-dev-28wd",
+  "ssh_key_ssm_param": "/inspec/test-ssh-key",
+  "profile": {
+    "bucket": "inspec-profiles-bucket-dev-28wd",
+    "key": "redhat-enterprise-linux-7-stig-baseline-master.zip"
+  },
+  "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
+  "config": {
+    "target": "ssh://ec2-user@ec2-15-200-235-74.us-gov-west-1.compute.amazonaws.com",
+    "sudo": true,
+    "input_file": {
       "bucket": "inspec-profiles-bucket-dev-28wd",
-      "key": "redhat-enterprise-linux-7-stig-baseline-master.zip"
-    },
-    "profile_common_name": "redhat-enterprise-linux-7-stig-baseline-master",
-    "config": {
-      "target": "ssh://ec2-user@ec2-15-200-235-74.us-gov-west-1.compute.amazonaws.com",
-      "sudo": true,
-      "input_file": {
-        "bucket": "inspec-profiles-bucket-dev-28wd",
-        "key": "rhel7-stig-baseline-master-disable-slow-controls.yml"
-      }
+      "key": "rhel7-stig-baseline-master-disable-slow-controls.yml"
     }
+  }
 }
 ```
 
@@ -212,3 +241,18 @@ You can do this via the AWS Console using the following steps:
 5. Expand `Configure Input` and choose `Constant (JSON text)`
 6. Paste your configuration into the `Constant (JSON text)` field (this will be passed to the lambda event each time it is triggered)
 
+### NOTICE
+
+© 2019-2021 The MITRE Corporation.
+
+Approved for Public Release; Distribution Unlimited. Case Number 18-3678.
+
+### NOTICE
+
+MITRE hereby grants express written permission to use, reproduce, distribute, modify, and otherwise leverage this software to the extent permitted by the licensed terms provided in the LICENSE.md file included with this project.
+
+### NOTICE
+
+This software was produced for the U. S. Government under Contract Number HHSM-500-2012-00008I, and is subject to Federal Acquisition Regulation Clause 52.227-14, Rights in Data-General.
+
+No other use other than that granted to the U. S. Government, or to those acting on behalf of the U. S. Government under that Clause is authorized without the express written permission of The MITRE Corporation.

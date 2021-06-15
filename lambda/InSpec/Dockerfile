@@ -31,6 +31,7 @@ FROM public.ecr.aws/lambda/ruby:2.7
 #
 RUN yum install -y gcc make gcc-c++ git
 COPY lambda_function.rb Gemfile Gemfile.lock .ruby-version /var/task/
+RUN cd /var/task && git init
 RUN bundle install --path vendor/bundle/
 
 ##

@@ -540,6 +540,7 @@ PLATFORMS
   x86_64-darwin-19
 
 DEPENDENCIES
+  aws-sdk-lambda (~> 1)
   aws-sdk-s3 (~> 1)
   aws-sdk-ssm (~> 1)
   byebug

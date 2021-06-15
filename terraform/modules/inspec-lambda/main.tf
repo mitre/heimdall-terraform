@@ -176,6 +176,9 @@ resource "aws_iam_role" "InSpecRole" {
 #
 module "InSpec" {
   source = "terraform-aws-modules/lambda/aws"
+  depends_on = [
+    null_resource.push_image
+  ]
 
   function_name = "InSpec-${var.deployment_id}"
   description   = "Lambda capable of performing InSpec scans."

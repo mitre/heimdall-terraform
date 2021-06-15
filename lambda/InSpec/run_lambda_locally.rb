@@ -27,19 +27,19 @@ require_relative 'lambda_function'
 
 lambda_handler(
   event: {
-    "profile" => {
-      "bucket" => "inspec-profiles-bucket-dev-myzr",
-      "key" => "redhat-enterprise-linux-7-stig-baseline-master.zip"
-    },
+    "results_bucket" => "inspec-results-bucket-dev-28wd",
+    "ssh_key_ssm_param" => "/inspec/test-ssh-key",
+    "profile" => "https://github.com/mitre/redhat-enterprise-linux-7-stig-baseline.git",
     "profile_common_name" => "redhat-enterprise-linux-7-stig-baseline-master",
     "config" => {
       "target" => "ssh://ec2-user@i-00f1868f8f3b4eb03",
-      "input_file" => {
-        "bucket" => "inspec-profiles-bucket-dev-myzr",
-        "key" => "rhel7-stig-baseline-master-disable-slow-controls.yml"
-      },
+      "input" => [
+        "disable_slow_controls=true"
+      ],
       "sudo" => true
     }
   },
   context: nil
 )
+
+
