@@ -1,7 +1,7 @@
-VERSION=$(cat '../../../lambda/InSpec/.version')
+VERSION=$(cat './version')
 
-docker build -t mitre/serverless-inspec:$VERSION ../../../lambda/InSpec
-docker tag mitre/serverless-inspec:$VERSION mitre/serverless-inspec:latestd
+docker build -t mitre/serverless-inspec-lambda:$VERSION ./src/
+docker tag mitre/serverless-inspec-lambda:$VERSION mitre/serverless-inspec-lambda:latest
 
-docker save mitre/serverless-inspec:$VERSION > serverless-inspec.tar
+# docker save mitre/serverless-inspec-lambda:$VERSION > serverless-inspec-lambda.tar
 

@@ -9,50 +9,6 @@ terraform {
 }
 
 ##
-# Computed local variables
-#
-locals {
-  # If image_version is not set, then default to the lastest available version
-  image_version = var.image_version != null ? var.image_version : file("./version")
-}
-
-# Elastic Container Registry for SAF deployment
-#
-# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/ecr_repository
-#
-resource "aws_ecr_repository" "mitre_serverless_inspec" {
-  name                 = "mitre/serverless-inspec-lambda"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
-
-resource "null_resource" "push_image" {
-  depends_on = [
-    aws_ecr_repository.mitre_serverless_inspec,
-  ]
-
-  # Ensures this script always runs
-  triggers = {
-    always_run = timestamp()
-  }
-
-  # https://www.terraform.io/docs/language/resources/provisioners/local-exec.html
-  provisioner "local-exec" {
-    command = "./push-image.sh"
-
-    environment = {
-      AWS_REGION     = var.aws_region
-      AWS_ACCOUNT_ID = var.account_id
-      REPO_NAME      = "mitre/serverless-inspec-lambda"
-      IMAGE_TAG      = local.image_version
-    }
-  }
-}
-
-##
 # InSpec Role to Invoke InSpec Lambda function 
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
@@ -61,7 +17,7 @@ resource "aws_iam_role" "InSpecRole" {
   name = "InSpecRole-${var.deployment_id}"
 
   # Allow execution of the lambda function
-  # User: arn:aws-us-gov:sts::675609379314:assumed-role/InSpecRole-28wd/InSpec-28wd is not authorized to perform: iam:ListPolicies on resource: policy path /
+  # User: is not authorized to perform: iam:ListPolicies on resource: policy path /
   # Should NOT have AWS Config Write access
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
@@ -83,25 +39,6 @@ resource "aws_iam_role" "InSpecRole" {
       }
     ]
   })
-
-  # Allow invoking the HeimdallPusher lambda
-  inline_policy {
-    name = "AllowHeimdallPusherInvoke"
-
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "lambda:InvokeFunction"
-          ]
-          Effect   = "Allow"
-          Resource = var.heimdall_pusher_lambda_arn
-        }
-      ]
-    })
-  }
-
 
   # Allow S3 read access to InSpec profile bucket
   inline_policy {
@@ -199,29 +136,10 @@ resource "aws_iam_role" "InSpecRole" {
 #
 # https://registry.terraform.io/modules/terraform-aws-modules/lambda/aws/latest
 #
-module "InSpec" {
-  source = "terraform-aws-modules/lambda/aws"
-  depends_on = [
-    null_resource.push_image
-  ]
-
-  function_name = "InSpec-${var.deployment_id}"
-  description   = "Lambda capable of performing InSpec scans."
-  handler       = "lambda_function.lambda_handler"
-  runtime       = "ruby2.7"
-  create_role   = false
-  lambda_role   = aws_iam_role.InSpecRole.arn
-  timeout       = 900
-  memory_size   = 1024
-
-  vpc_subnet_ids         = var.subnet_ids
-  vpc_security_group_ids = var.security_groups
-
-  create_package = false
-  image_uri      = "${var.account_id}.dkr.ecr.${var.aws_region}.amazonaws.com/mitre/serverless-inspec-lambda:${local.image_version}"
-  package_type   = "Image"
-
-  environment_variables = {
-    HOME = "/tmp"
-  }
+module "serverless-inspec-lambda" {
+  source = "git@github.com:mitre/serverless-inspec-lambda"
+  subnet_ids      = var.subnet_ids
+  security_groups = var.security_groups
+  lambda_role_arn = aws_iam_role.InSpecRole.arn
+  lambda_name     = "serverless-inspec-lambda-${var.deployment_id}"
 }

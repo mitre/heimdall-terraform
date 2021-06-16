@@ -13,10 +13,6 @@ if [ -z "$AWS_ACCOUNT_ID" ]; then
     exit 1
 fi
 
-if [ -z "$IMAGE_FILE" ]; then
-    echo '$IMAGE_FILE is a required ENV variable!'
-    exit 1
-fi
 
 if [ -z "$REPO_NAME" ]; then
     echo '$REPO_NAME is a required ENV variable!'
@@ -28,16 +24,7 @@ if [ -z "$IMAGE_TAG" ]; then
     exit 1
 fi
 
-echo "AWS_REGION='$AWS_REGION' AWS_ACCOUNT_ID='$AWS_ACCOUNT_ID' IMAGE_FILE='$IMAGE_FILE' REPO_NAME='$REPO_NAME' IMAGE_TAG='$IMAGE_TAG'"
-
-##
-# Ensure the image file exists
-#
-if [ ! -f $IMAGE_FILE ]; then
-    echo '$IMAGE_FILE file does not exist!'
-    echo 'Run `./pull-image.sh` to get the file set up.'
-    exit 1
-fi
+echo "AWS_REGION='$AWS_REGION' AWS_ACCOUNT_ID='$AWS_ACCOUNT_ID' REPO_NAME='$REPO_NAME' IMAGE_TAG='$IMAGE_TAG'"
 
 ##
 # Variable creation
@@ -58,10 +45,9 @@ aws ecr get-login-password \
     --username AWS \
     --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
-docker load --input $IMAGE_FILE
-
+##
+# Re-tag the image to the identifier that will be pushed up to ECR
 docker tag $IMAGE_IDENTIFIER $IMAGE
-
 
 ##
 # Check the SHA of the local and remote images. Don't push if they are the same

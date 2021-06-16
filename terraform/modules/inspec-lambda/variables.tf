@@ -45,3 +45,9 @@ variable "heimdall_pusher_lambda_arn" {
   description = "The arn for the heimdall_pusher_lambda function"
   type = string
 }
+
+variable "image_version" {
+  description = "The image and tag of the lambda docker image to deploy"
+  type = string
+  default = null
+}
