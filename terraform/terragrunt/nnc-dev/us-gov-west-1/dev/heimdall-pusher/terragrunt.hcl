@@ -22,7 +22,7 @@ locals {
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
 # working directory, into a temporary folder, and execute your Terraform commands in that folder.
 terraform {
-  source = "../../../../../..//terraform/modules/heimdall-pusher"
+  source = "../../../../../..//terraform/modules/serverless-heimdall-pusher-lambda"
 }
 
 dependency "random" {
@@ -79,21 +79,11 @@ dependency "inspec-s3" {
 
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
-  deployment_id    = dependency.random.outputs.deployment_id
-  env              = local.env
-  vpc_id           = dependency.saf-tenant-net.outputs.vpc_id
-  subnet_ids       = dependency.saf-tenant-net.outputs.private_subnet_ids
-
-  security_groups = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
-
-  aws_region   = local.aws_region
-  account_name = local.account_name
-
+  deployment_id     = dependency.random.outputs.deployment_id
+  subnet_ids        = dependency.saf-tenant-net.outputs.private_subnet_ids
+  security_groups   = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
   heimdall_url      = "http://${dependency.saf-heimdall-alb.outputs.private_alb_address}"
   heimdall_user     = "HeimdallPusher@example.com"
   heimdall_password = "foobar"
-
-  function_zip_path = fileexists(local.exec_multi_path) ? local.exec_multi_path : local.exec_single_path
-
   results_bucket_id = dependency.inspec-s3.outputs.inspec_results_bucket_name
 }
