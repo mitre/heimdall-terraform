@@ -8,6 +8,15 @@
 #  > sudo su - ec2-user
 
 ##
+# Install SSM Agent
+#
+REGION='us-gov-west-1'
+sudo yum install -y "https://s3.$REGION.amazonaws.com/amazon-ssm-$REGION/latest/linux_amd64/amazon-ssm-agent.rpm"
+sudo systemctl start amazon-ssm-agent
+sudo systemctl enable amazon-ssm-agent
+sudo systemctl status amazon-ssm-agent
+
+##
 # Install YUM dependencies
 #
 # /etc/yum.repos.d/centos-extras.repo
@@ -46,15 +55,6 @@ sudo systemctl start docker
 sudo systemctl enable docker
 sudo docker run hello-world
 sudo chmod 666 /var/run/docker.sock
-
-##
-# Install SSM Agent
-#
-REGION='us-gov-west-1'
-sudo yum install -y "https://s3.$REGION.amazonaws.com/amazon-ssm-$REGION/latest/linux_amd64/amazon-ssm-agent.rpm"
-sudo systemctl start amazon-ssm-agent
-sudo systemctl enable amazon-ssm-agent
-sudo systemctl status amazon-ssm-agent
 
 ##
 # Install AWS CLI and plugins
