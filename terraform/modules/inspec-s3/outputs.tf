@@ -13,7 +13,3 @@ output "inspec_results_bucket_name" {
 output "inspec_results_bucket_arn" {
   value = aws_s3_bucket.inspec_results_bucket.arn
 }
-
-output "inspec_rhel7_baseline_s3_key" {
-  value = "s3://${aws_s3_bucket.inspec_profiles_bucket.id}/redhat-enterprise-linux-7-stig-baseline"
-}

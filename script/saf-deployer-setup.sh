@@ -54,7 +54,8 @@ sudo yum install -y docker-ce docker-ce-cli containerd.io
 sudo systemctl start docker
 sudo systemctl enable docker
 sudo docker run hello-world
-sudo chmod 666 /var/run/docker.sock
+# sudo chmod 666 /var/run/docker.sock
+sudo usermod -aG docker ec2-user
 
 ##
 # Install AWS CLI and plugins
