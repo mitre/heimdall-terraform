@@ -105,6 +105,12 @@ GIT_AUTH='<uid>:<token>'
 git clone "https://$GIT_AUTH@code.il2.dso.mil/dod-cloud-iac/awsconfigs.git"
 
 ##
+# Get external module git dependencies in case they are not cached as expected 
+#
+git clone https://github.com/mitre/serverless-heimdall-pusher-lambda.git
+git clone https://github.com/mitre/serverless-inspec-lambda.git
+
+##
 # Clean up
 #
 yum clean all
