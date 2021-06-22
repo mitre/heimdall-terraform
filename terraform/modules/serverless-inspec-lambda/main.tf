@@ -9,6 +9,30 @@ terraform {
 }
 
 ##
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region
+#
+data "aws_region" "current" {}
+
+##
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity
+#
+data "aws_caller_identity" "current" {}
+
+##
+# The KMS key used by serverless InSpec to access SSM Parameters and Other encrypted items
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key
+#
+resource "aws_kms_key" "inspec-kms-key" {
+  description             = "The KMS key used by serverless InSpec to access SSM Parameters and Other encrypted items"
+  deletion_window_in_days = 10
+
+  tags = {
+    Name = "inspec-kms-key"
+  }
+}
+
+##
 # InSpec Role to Invoke InSpec Lambda function 
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
@@ -89,29 +113,29 @@ resource "aws_iam_role" "InSpecRole" {
             "ssm:StartSession"
           ]
           Effect   = "Allow"
-          Resource = "*" # consider locking this down to a GetParameter subpath
+          Resource = "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/inspec/*"
         }
       ]
     })
   }
 
   # Allow EC2 get password data for fetching WinRM credentials
-  inline_policy {
-    name = "EC2GetPasswordDataAccess"
+  # inline_policy {
+  #   name = "EC2GetPasswordDataAccess"
 
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "ec2:GetPasswordData"
-          ]
-          Effect   = "Allow"
-          Resource = "*" # consider locking this down to a specific groups of machines
-        }
-      ]
-    })
-  }
+  #   policy = jsonencode({
+  #     Version = "2012-10-17"
+  #     Statement = [
+  #       {
+  #         Action = [
+  #           "ec2:GetPasswordData"
+  #         ]
+  #         Effect   = "Allow"
+  #         Resource = "*" # consider locking this down to a specific groups of machines
+  #       }
+  #     ]
+  #   })
+  # }
 
   inline_policy {
     name = "AllowHeimdallPassKmsKeyDecrypt"
@@ -124,7 +148,7 @@ resource "aws_iam_role" "InSpecRole" {
             "kms:Decrypt"
           ]
           Effect   = "Allow"
-          Resource = "*" # consider locking this down to specific key(s)
+          Resource = aws_kms_key.inspec-kms-key.arn
         }
       ]
     })
@@ -137,7 +161,7 @@ resource "aws_iam_role" "InSpecRole" {
 # https://registry.terraform.io/modules/terraform-aws-modules/lambda/aws/latest
 #
 module "serverless-inspec-lambda" {
-  source = "git@github.com:mitre/serverless-inspec-lambda"
+  source = "github.com/mitre/serverless-inspec-lambda"
   subnet_ids      = var.subnet_ids
   security_groups = var.security_groups
   lambda_role_arn = aws_iam_role.InSpecRole.arn
