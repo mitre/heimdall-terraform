@@ -31,10 +31,11 @@ resource "aws_alb_target_group" "public-heimdal-alb-targetgroup" {
   health_check {
     healthy_threshold   = 2
     unhealthy_threshold = 5
-    timeout             = 5
-    interval            = 60
-    path                = "/"
+    timeout             = 60
+    interval            = 300
+    path                = "/login"
     port                = 3000
+    matcher             = "200,304"
   }
 
   tags = {
