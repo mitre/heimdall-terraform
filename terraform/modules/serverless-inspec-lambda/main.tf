@@ -138,7 +138,7 @@ resource "aws_iam_role" "InSpecRole" {
   # }
 
   inline_policy {
-    name = "AllowHeimdallPassKmsKeyDecrypt"
+    name = "AllowInSpecKmsKeyDecrypt"
 
     policy = jsonencode({
       Version = "2012-10-17"
