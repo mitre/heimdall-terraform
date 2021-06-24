@@ -8,9 +8,17 @@ resource "aws_alb" "heimdall-alb-public" {
   name            = "heimdall-alb-public-${var.deployment_id}"
   subnets         = var.public_subnet_ids
   security_groups = concat([aws_security_group.SafHeimdallContainerCommsSG.id, aws_security_group.SafHeimdallAlbSG.id], var.addl_alb_sg_ids)
+  
+  
+  access_logs {
+    bucket  = aws_s3_bucket.elb_logging_bucket.bucket
+    prefix  = "heimdall-public-lb"
+    enabled = true
+  }
+
   tags = {
     Name    = "heimdall-alb-public-${var.deployment_id}"
-    #Owner   = basename(data.aws_caller_identity.current.arn)
+    Owner   = basename(data.aws_caller_identity.current.arn)
     Project = var.proj_name
   }
 }
@@ -40,7 +48,7 @@ resource "aws_alb_target_group" "public-heimdal-alb-targetgroup" {
 
   tags = {
     Name    = "public-heimdal-alb-tg-${var.deployment_id}"
-    #Owner   = basename(data.aws_caller_identity.current.arn)
+    Owner   = basename(data.aws_caller_identity.current.arn)
     Project = var.proj_name
   }
 }
