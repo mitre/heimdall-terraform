@@ -100,6 +100,65 @@ resource "aws_iam_role" "InSpecRole" {
     })
   }
 
+  # Allow SSM DescribeInstanceInformation for awsssm:// transports
+  inline_policy {
+    name = "SsmDescribeInstanceInformationAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "ssm:DescribeInstanceInformation"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow SSM SendCommand for awsssm:// transports
+  inline_policy {
+    name = "SsmSendCommandAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "ssm:SendCommand"
+          ]
+          Effect   = "Allow"
+          Resource = [
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:managed-instance/*",
+              "arn:aws-us-gov:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:instance/*",
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:document/AWS-RunPowerShellScript",
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:document/AWS-RunShellScript"
+          ]
+        }
+      ]
+    })
+  }
+
+  # Allow SSM SendCommand for awsssm:// transports
+  inline_policy {
+    name = "SsmGetCommandInvocationAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "ssm:GetCommandInvocation"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
   # Allow SSM access for starting sessions and SSM parameters
   inline_policy {
     name = "SsmParamAndSessionAccess"
