@@ -131,10 +131,9 @@ resource "aws_iam_role" "InSpecRole" {
           ]
           Effect   = "Allow"
           Resource = [
-              "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:managed-instance/*",
               "arn:aws-us-gov:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:instance/*",
-              "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:document/AWS-RunPowerShellScript",
-              "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:document/AWS-RunShellScript"
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunPowerShellScript",
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunShellScript"
           ]
         }
       ]
