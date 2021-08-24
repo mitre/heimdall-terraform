@@ -64,6 +64,24 @@ resource "aws_iam_role" "InSpecRole" {
     ]
   })
 
+  # Allow logs:DescribeMetricFilters for aws:// profiles
+  inline_policy {
+    name = "LogsDescribeMetricFilters"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "logs:DescribeMetricFilters"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
   # Allow S3 read access to InSpec profile bucket
   inline_policy {
     name = "S3ProfileAccess"
