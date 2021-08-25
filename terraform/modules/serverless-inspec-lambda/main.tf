@@ -228,18 +228,31 @@ resource "aws_iam_role" "InSpecRole" {
     })
   }
 
-  # Allow SSM access for starting sessions and SSM parameters
+  # Allow SSM access for starting sessions 
   inline_policy {
-    name = "SsmParamAndSessionAccess"
+    name = "SsmSessionAccess"
 
     policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
-          Action = [
-            "ssm:GetParameter",
-            "ssm:StartSession"
-          ]
+          Action   = "ssm:StartSession"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow SSM parameters acccess for /inspec/*
+  inline_policy {
+    name = "SsmParamAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "ssm:GetParameter"
           Effect   = "Allow"
           Resource = "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/inspec/*"
         }
