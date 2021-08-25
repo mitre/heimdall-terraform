@@ -1,8 +1,7 @@
 # https://docs.aws.amazon.com/lambda/latest/dg/python-package.html
 # https://docs.aws.amazon.com/lambda/latest/dg/ruby-package.html
 
-# FUNCTION_NAME='ConfigToHdf'
-FUNCTION_NAME='HeimdallPusher'
+FUNCTION_NAME='ConfigToHdf'
 
 cd lambda/$FUNCTION_NAME
 
