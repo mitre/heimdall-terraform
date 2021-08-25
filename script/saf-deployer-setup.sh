@@ -8,9 +8,24 @@
 #  > sudo su - ec2-user
 
 ##
+# ENV variable check
+#
+if [ -z "$GIT_AUTH" ]; then
+    echo '$GIT_AUTH is a required ENV variable!'
+    echo "export GIT_AUTH='<uid>:<token>'"
+    exit 1
+fi
+
+if [ -z "$REGION" ]; then
+    echo '$REGION is a required ENV variable!'
+    echo "export REGION='<Current AWS Region>'"
+    echo 'us-gov-west-1, us-west-1, etc.'
+    exit 1
+fi
+
+##
 # Install SSM Agent
 #
-REGION='us-gov-west-1'
 sudo yum install -y "https://s3.$REGION.amazonaws.com/amazon-ssm-$REGION/latest/linux_amd64/amazon-ssm-agent.rpm"
 sudo systemctl start amazon-ssm-agent
 sudo systemctl enable amazon-ssm-agent
@@ -87,10 +102,16 @@ sudo echo -e 'plugin_cache_dir   = "$HOME/.terraform.d/plugin-cache"
 disable_checkpoint = true' >> ~/.terraformrc
 
 ##
-# Fetch Docker images
+# Fetch Docker images and back them up to tar files
 #
-docker pull ghcr.io/mitre/serverless-heimdall-pusher-lambda:0.1
-docker pull ghcr.io/mitre/serverless-inspec-lambda:0.12
+docker pull ghcr.io/mitre/serverless-heimdall-pusher-lambda:0.1.1
+docker save mitre/heimdall2:release-latest > serverless-heimdall-pusher-lambda.tar
+
+docker pull ghcr.io/mitre/serverless-inspec-lambda:0.14:0
+docker save mitre/heimdall2:release-latest > serverless-inspec-lambda.tar
+
+docker pull mitre/heimdall2:release-latest
+docker save mitre/heimdall2:release-latest > heimdall2.tar
 
 ##
 # AWS Credentials
@@ -102,7 +123,6 @@ touch ~/.aws/credentials
 ##
 # Get code
 #
-GIT_AUTH='<uid>:<token>'
 git clone "https://$GIT_AUTH@code.il2.dso.mil/dod-cloud-iac/awsconfigs.git"
 
 ##
@@ -110,6 +130,15 @@ git clone "https://$GIT_AUTH@code.il2.dso.mil/dod-cloud-iac/awsconfigs.git"
 #
 git clone https://github.com/mitre/serverless-heimdall-pusher-lambda.git
 git clone https://github.com/mitre/serverless-inspec-lambda.git
+
+# Copy heimdall2.tar to proper location
+#
+cp heimdall2.tar awsconfigs/terraform/modules/saf-heimdall-ecr/heimdall2.tar
+
+##
+# Build the ConfigToHdf lambda
+#
+(cd awsconfigs && ./script/build-lambda.sh)
 
 ##
 # Clean up

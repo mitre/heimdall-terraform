@@ -81,6 +81,59 @@ resource "aws_iam_role" "InSpecRole" {
       ]
     })
   }
+  
+  # Allow iam:ListPolicies for CIS Baseline
+  inline_policy {
+    name = "IamListPoliciesAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "iam:ListPolicies"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow logs:DescribeMetricFilters for CIS Baseline
+  inline_policy {
+    name = "DescribeMetricFiltersAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "logs:DescribeMetricFilters"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow Policy and ACL access for CIS Baseline
+  # https://docs.chef.io/inspec/resources/aws_s3_bucket/#be_public
+  inline_policy {
+    name = "S3PolicyAndAclAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "s3:GetBucketPolicyStatus",
+            "s3:GetBucketAcl",
+            "s3:GetBucketPolicy"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
 
   # Allow S3 read access to InSpec profile bucket
   inline_policy {
@@ -148,8 +201,9 @@ resource "aws_iam_role" "InSpecRole" {
             "ssm:SendCommand"
           ]
           Effect   = "Allow"
+          # Consider locking this down further to only instances that need to be scanned with awsssm://
           Resource = [
-              "arn:aws-us-gov:ec2:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:instance/*",
+              "arn:aws-us-gov:ec2:*:${data.aws_caller_identity.current.account_id}:instance/*",
               "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunPowerShellScript",
               "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunShellScript"
           ]
@@ -166,9 +220,7 @@ resource "aws_iam_role" "InSpecRole" {
       Version = "2012-10-17"
       Statement = [
         {
-          Action = [
-            "ssm:GetCommandInvocation"
-          ]
+          Action   = "ssm:GetCommandInvocation"
           Effect   = "Allow"
           Resource = "*"
         }
