@@ -25,8 +25,10 @@ module "vpc" {
   private_subnets       = local.private_subnet_cidrs
   private_subnet_suffix = "private-saf-tenant-subnet"
 
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
+
+#Disabled for nnc-offline test
+  enable_nat_gateway   = false
+  single_nat_gateway   = false
   enable_dns_hostnames = true
   enable_dns_support   = true
 

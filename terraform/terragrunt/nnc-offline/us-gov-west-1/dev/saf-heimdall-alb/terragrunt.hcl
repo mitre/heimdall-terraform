@@ -60,4 +60,5 @@ inputs = {
   private_subnet_ids = local.private_subnet_ids
   addl_alb_sg_ids    = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
   aws_region         = local.aws_region
+  heimdall_alb_frontend_private = true
 }
