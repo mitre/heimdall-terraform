@@ -6,6 +6,10 @@ locals {
   environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
+  vpc_id        = local.environment_vars.locals.vpc_id
+  public_subnet_ids = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
+  
   env        = local.environment_vars.locals.environment
   aws_region = local.region_vars.locals.aws_region
 }
@@ -31,26 +35,16 @@ dependency "random" {
   }
 }
 
-dependency "saf-tenant-net" {
-  config_path = "../saf-tenant-net"
-
-  mock_outputs = {
-    vpc_id             = "temporary-dummy-id"
-    private_subnet_ids = ["temporary-dummy-private-subnet"]
-  }
-}
-
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
   env           = local.env
   deployment_id = dependency.random.outputs.deployment_id
   rds_passworld = dependency.random.outputs.rds_password
-  vpc_id        = dependency.saf-tenant-net.outputs.vpc_id
-  subnet_ids    = dependency.saf-tenant-net.outputs.private_subnet_ids
+  vpc_id        = local.vpc_id
+  subnet_ids    = local.private_subnet_ids
   aws_region    = local.aws_region
-  #Dev Config Inputs
-  instance_class        = "db.t2.small" #encryption at rest is not supported for db.t2.micro
+  instance_class        = "db.t2.large" #encryption at rest is not supported for db.t2.micro
   deletion_protection   = false
-  allocated_storage     = 20
-  max_allocated_storage = 100
+  allocated_storage     = 60
+  max_allocated_storage = 200
 }

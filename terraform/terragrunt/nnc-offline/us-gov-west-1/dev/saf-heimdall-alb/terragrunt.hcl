@@ -6,6 +6,10 @@ locals {
   environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
+  vpc_id        = local.environment_vars.locals.vpc_id
+  public_subnet_ids = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
+
   env        = local.environment_vars.locals.environment
   aws_region = local.region_vars.locals.aws_region
 }
@@ -31,16 +35,6 @@ dependency "random" {
   }
 }
 
-dependency "saf-tenant-net" {
-  config_path = "../saf-tenant-net"
-
-  mock_outputs = {
-    vpc_id             = "temporary-dummy-id"
-    public_subnet_ids  = ["temporary-dummy-public-subnet"]
-    private_subnet_ids = ["temporary-dummy-private-subnet"]
-  }
-}
-
 dependency "saf-tenant-security-groups" {
   config_path = "../saf-tenant-security-groups"
 
@@ -61,9 +55,9 @@ dependency "saf-tenant-endpoints" {
 inputs = {
   env                = local.env
   deployment_id      = dependency.random.outputs.deployment_id
-  vpc_id             = dependency.saf-tenant-net.outputs.vpc_id
-  public_subnet_ids  = dependency.saf-tenant-net.outputs.public_subnet_ids
-  private_subnet_ids = dependency.saf-tenant-net.outputs.private_subnet_ids
+  vpc_id             = local.vpc_id
+  public_subnet_ids  = local.public_subnet_ids
+  private_subnet_ids = local.private_subnet_ids
   addl_alb_sg_ids    = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
   aws_region         = local.aws_region
 }

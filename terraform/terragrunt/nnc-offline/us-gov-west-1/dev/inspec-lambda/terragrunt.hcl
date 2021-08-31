@@ -15,6 +15,9 @@ locals {
   aws_region   = local.region_vars.locals.aws_region
   account_name = local.account_vars.locals.account_name
 
+  vpc_id        = local.environment_vars.locals.vpc_id
+  public_subnet_ids = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
 
   exec_dockerfile_multi_path  = abspath("../../../../../lambda/InSpec/Dockerfile")
   exec_multi_path  = abspath("../../../../../lambda/InSpec/")
@@ -33,15 +36,6 @@ dependency "random" {
   mock_outputs = {
     deployment_id = "000"
     rds_password  = "Password123"
-  }
-}
-
-dependency "saf-tenant-net" {
-  config_path = "../saf-tenant-net"
-
-  mock_outputs = {
-    vpc_id             = "temporary-dummy-id"
-    private_subnet_ids = ["temporary-dummy-private-subnet"]
   }
 }
 
@@ -73,7 +67,7 @@ dependency "inspec-s3" {
 
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
-  subnet_ids          = dependency.saf-tenant-net.outputs.private_subnet_ids
+  subnet_ids          = local.private_subnet_ids
   security_groups     = [
     dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id,
     dependency.saf-tenant-security-groups.outputs.SafEgressOnlySG_id
