@@ -139,10 +139,10 @@ fi
 #
 mkdir ~/docker-images/
 docker pull ghcr.io/mitre/serverless-heimdall-pusher-lambda:0.1.1
-docker save mitre/heimdall2:release-latest > ~/docker-images/serverless-heimdall-pusher-lambda.tar
+docker save ghcr.io/mitre/serverless-heimdall-pusher-lambda:0.1.1 > ~/docker-images/serverless-heimdall-pusher-lambda-0.1.1.tar
 
-docker pull ghcr.io/mitre/serverless-inspec-lambda:0.15:5
-docker save mitre/heimdall2:release-latest > ~/docker-images/serverless-inspec-lambda.tar
+docker pull ghcr.io/mitre/serverless-inspec-lambda:0.15.5
+docker save ghcr.io/mitre/serverless-inspec-lambda:0.15.5 > ~/docker-images/serverless-inspec-lambda-0.15.5.tar
 
 docker pull mitre/heimdall2:release-latest
 docker save mitre/heimdall2:release-latest > ~/docker-images/heimdall2.tar
@@ -208,6 +208,12 @@ inspec archive --tar aws-rds-infrastructure-cis-baseline
 git clone https://github.com/mitre/kubernetes-cis-baseline
 inspec archive --tar kubernetes-cis-baseline
 cd
+
+##
+# Copy the upload helper script to ~/inspec-profiles/
+#
+cp ~/awsconfigs/script/push-profiles-to-s3.sh ~/inspec-profiles/push-profiles-to-s3.sh
+chmod +x ~/inspec-profiles/push-profiles-to-s3.sh
 
 ##
 # Fetch AWS CLI packages that may be needed elsewhere
