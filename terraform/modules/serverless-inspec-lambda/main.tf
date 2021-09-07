@@ -307,5 +307,5 @@ module "serverless-inspec-lambda" {
   security_groups = var.security_groups
   lambda_role_arn = aws_iam_role.InSpecRole.arn
   lambda_name     = "serverless-inspec-lambda-${var.deployment_id}"
-  image_version   = "0.15.6"
+  image_version   = "0.15.7"
 }
