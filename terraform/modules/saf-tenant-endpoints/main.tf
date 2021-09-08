@@ -53,11 +53,11 @@ resource "aws_vpc_endpoint" "LambdaVpcEndpoint" {
 }
 
 ##
-# ConfigToHdf AWS SSM VPC Endpoint for accessing password SSM parameter
+# AWS SSM VPC Endpoint for accessing password SSM parameter
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
 #
-resource "aws_vpc_endpoint" "ConfigToHdfSsmVpcEndpoint" {
+resource "aws_vpc_endpoint" "SsmVpcEndpoint" {
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.aws_region}.ssm"
   vpc_endpoint_type = "Interface"
@@ -68,7 +68,46 @@ resource "aws_vpc_endpoint" "ConfigToHdfSsmVpcEndpoint" {
   private_dns_enabled = true
 
   tags = {
-    Name = "ConfigToHdfSsmVpcEndpoint-${var.deployment_id}"
+    Name = "SsmVpcEndpoint-${var.deployment_id}"
+  }
+}
+
+##
+# SSM Messages VPC endpoint for train-awsssm
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
+#
+resource "aws_vpc_endpoint" "SsmMessagesVpcEndpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.aws_region}.ssmmessages"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids         = var.subnet_ids
+  security_group_ids = var.security_groups
+
+  private_dns_enabled = true
+
+  tags = {
+    Name = "SsmMessagesVpcEndpoint-${var.deployment_id}"
+  }
+
+##
+# EC2 endpoint for use by train-awsssm
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
+#
+resource "aws_vpc_endpoint" "Ec2VpcEndpoint" {
+  vpc_id            = var.vpc_id
+  service_name      = "com.amazonaws.${var.aws_region}.ec2"
+  vpc_endpoint_type = "Interface"
+
+  subnet_ids         = var.subnet_ids
+  security_group_ids = var.security_groups
+
+  private_dns_enabled = true
+
+  tags = {
+    Name = "Ec2VpcEndpoint-${var.deployment_id}"
   }
 }
 
@@ -77,7 +116,7 @@ resource "aws_vpc_endpoint" "ConfigToHdfSsmVpcEndpoint" {
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/vpc_endpoint
 #
-resource "aws_vpc_endpoint" "ConfigToHdfConfigVpcEndpoint" {
+resource "aws_vpc_endpoint" "ConfigVpcEndpoint" {
   vpc_id            = var.vpc_id
   service_name      = "com.amazonaws.${var.aws_region}.config"
   vpc_endpoint_type = "Interface"
@@ -88,7 +127,7 @@ resource "aws_vpc_endpoint" "ConfigToHdfConfigVpcEndpoint" {
   private_dns_enabled = true
 
   tags = {
-    Name = "ConfigToHdfConfigVpcEndpoint-${var.deployment_id}"
+    Name = "ConfigVpcEndpoint-${var.deployment_id}"
   }
 }
 

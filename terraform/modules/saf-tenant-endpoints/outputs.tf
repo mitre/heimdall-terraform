@@ -4,12 +4,12 @@ output "s3VpcEndpointPrefixListCidr" {
   value = aws_vpc_endpoint.s3VpcEndpoint.cidr_blocks[0]
 }
 
-output "ConfigToHdfSsmVpcEndpoint" {
-  value = aws_vpc_endpoint.ConfigToHdfSsmVpcEndpoint.dns_entry[0].dns_name
+output "SsmVpcEndpoint" {
+  value = aws_vpc_endpoint.SsmVpcEndpoint.dns_entry[0].dns_name
 }
 
-output "ConfigToHdfConfigVpcEndpoint" {
-  value = aws_vpc_endpoint.ConfigToHdfConfigVpcEndpoint.dns_entry[0].dns_name
+output "ConfigVpcEndpoint" {
+  value = aws_vpc_endpoint.ConfigVpcEndpoint.dns_entry[0].dns_name
 }
 
 output "CloudWatchVpcEndpoint" {
