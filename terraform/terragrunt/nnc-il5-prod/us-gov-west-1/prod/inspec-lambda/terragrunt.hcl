@@ -11,10 +11,12 @@ locals {
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
   # Extract out common variables for reuse
-  env          = local.environment_vars.locals.environment
-  aws_region   = local.region_vars.locals.aws_region
-  account_name = local.account_vars.locals.account_name
-
+  env                = local.environment_vars.locals.environment
+  aws_region         = local.region_vars.locals.aws_region
+  vpc_id             = local.environment_vars.locals.vpc_id
+  public_subnet_ids  = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
+  account_name       = local.account_vars.locals.account_name
 
   exec_dockerfile_multi_path  = abspath("../../../../../lambda/InSpec/Dockerfile")
   exec_multi_path  = abspath("../../../../../lambda/InSpec/")
@@ -64,7 +66,7 @@ dependency "inspec-s3" {
 
 # These are the variables we have to pass in to use the module specified in the terragrunt configuration above
 inputs = {
-  subnet_ids          = ["subnet-062bf9f006ace2094","subnet-0003c65ebe8ce2124"]
+  subnet_ids          = local.private_subnet_ids
   security_groups     = [
     dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id,
     dependency.saf-tenant-security-groups.outputs.SafEgressOnlySG_id

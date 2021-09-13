@@ -11,9 +11,12 @@ locals {
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
   # Extract out common variables for reuse
-  env          = local.environment_vars.locals.environment
-  aws_region   = local.region_vars.locals.aws_region
-  account_name = local.account_vars.locals.account_name
+  env                = local.environment_vars.locals.environment
+  aws_region         = local.region_vars.locals.aws_region
+  vpc_id             = local.environment_vars.locals.vpc_id
+  public_subnet_ids  = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
+  account_name       = local.account_vars.locals.account_name
 
   exec_multi_path  = abspath("../../../../../lambda/ConfigToHdf/function.zip")
   exec_single_path = abspath("../../../../../../lambda/ConfigToHdf/function.zip")
@@ -80,8 +83,8 @@ dependency "heimdall-pusher" {
 inputs = {
   deployment_id    = dependency.random.outputs.deployment_id
   env              = local.env
-  vpc_id           = "vpc-01a2fdc59b149673d"
-  subnet_ids       = ["subnet-062bf9f006ace2094","subnet-0003c65ebe8ce2124"]
+  vpc_id           = local.vpc_id
+  subnet_ids       = local.private_subnet_ids
 
   ConfigToHdf_security_groups       = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
 

@@ -6,7 +6,11 @@ locals {
   environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
-  aws_region = local.region_vars.locals.aws_region
+  env                = local.environment_vars.locals.environment
+  aws_region         = local.region_vars.locals.aws_region
+  vpc_id             = local.environment_vars.locals.vpc_id
+  public_subnet_ids  = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
 }
 
 # Include all settings from the root terragrunt.hcl file
@@ -43,8 +47,8 @@ dependency "saf-tenant-security-groups" {
 inputs = {
   aws_region      = local.aws_region
   deployment_id   = dependency.random.outputs.deployment_id
-  vpc_id          = "vpc-01a2fdc59b149673d"
-  subnet_ids      = ["subnet-062bf9f006ace2094","subnet-0003c65ebe8ce2124"]
+  vpc_id          = local.vpc_id
+  subnet_ids      = local.private_subnet_ids
   security_groups = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
 }
 

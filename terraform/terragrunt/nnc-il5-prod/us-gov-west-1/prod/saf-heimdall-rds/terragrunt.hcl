@@ -6,8 +6,11 @@ locals {
   environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
-  env        = local.environment_vars.locals.environment
-  aws_region = local.region_vars.locals.aws_region
+  env                = local.environment_vars.locals.environment
+  aws_region         = local.region_vars.locals.aws_region
+  vpc_id             = local.environment_vars.locals.vpc_id
+  public_subnet_ids  = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
 }
 
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
@@ -36,8 +39,8 @@ inputs = {
   env           = local.env
   deployment_id = dependency.random.outputs.deployment_id
   rds_passworld = dependency.random.outputs.rds_password
-  vpc_id        = "vpc-01a2fdc59b149673d"
-  subnet_ids    = ["subnet-062bf9f006ace2094","subnet-0003c65ebe8ce2124"]
+  vpc_id        = local.vpc_id
+  subnet_ids    = local.private_subnet_ids
   aws_region    = local.aws_region
   #Dev Config Inputs
   instance_class        = "db.t2.large" #encryption at rest is not supported for db.t2.micro

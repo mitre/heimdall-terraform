@@ -6,8 +6,11 @@ locals {
   environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
-  env        = local.environment_vars.locals.environment
-  aws_region = local.region_vars.locals.aws_region
+  env                = local.environment_vars.locals.environment
+  aws_region         = local.region_vars.locals.aws_region
+  vpc_id             = local.environment_vars.locals.vpc_id
+  public_subnet_ids  = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
 }
 
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
@@ -81,8 +84,8 @@ dependency "saf-heimdall-ecr" {
 inputs = {
   env              = local.env
   deployment_id    = dependency.random.outputs.deployment_id
-  vpc_id           = "vpc-01a2fdc59b149673d"
-  subnet_ids       = ["subnet-02744fc6e1d1e10b3","subnet-013ebd52c1d4b2f4f"]
+  vpc_id           = local.vpc_id
+  subnet_ids       = local.private_subnet_ids # This used to be the public nets but DEV and IL6 are set to private
   aws_region       = local.aws_region
   heimdall_image   = dependency.saf-heimdall-ecr.outputs.heimdall_image
   heimdall_ecr_arn = dependency.saf-heimdall-ecr.outputs.heimdall_ecr_arn
