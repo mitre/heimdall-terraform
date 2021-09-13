@@ -43,3 +43,7 @@ variable "addl_alb_sg_ids" {
 variable "aws_region" {
   type = string
 }
+
+variable "heimdall_alb_frontend_private" {
+  default = false
+}
