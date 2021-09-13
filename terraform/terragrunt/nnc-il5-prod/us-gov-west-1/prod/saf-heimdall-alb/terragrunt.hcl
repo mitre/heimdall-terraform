@@ -6,8 +6,11 @@ locals {
   environment_vars = read_terragrunt_config(find_in_parent_folders("env.hcl"))
   common_vars      = yamldecode(file(find_in_parent_folders("common_vars.yaml")))
 
-  env        = local.environment_vars.locals.environment
-  aws_region = local.region_vars.locals.aws_region
+  env                = local.environment_vars.locals.environment
+  aws_region         = local.region_vars.locals.aws_region
+  vpc_id             = local.environment_vars.locals.vpc_id
+  public_subnet_ids  = local.environment_vars.locals.public_subnet_ids
+  private_subnet_ids = local.environment_vars.locals.private_subnet_ids
 }
 
 # Terragrunt will copy the Terraform configurations specified by the source parameter, along with any files in the
@@ -51,9 +54,9 @@ dependency "saf-tenant-endpoints" {
 inputs = {
   env                = local.env
   deployment_id      = dependency.random.outputs.deployment_id
-  vpc_id             = "vpc-01a2fdc59b149673d"
-  public_subnet_ids  = ["subnet-02744fc6e1d1e10b3","subnet-013ebd52c1d4b2f4f"]
-  private_subnet_ids = ["subnet-062bf9f006ace2094","subnet-0003c65ebe8ce2124"]
+  vpc_id             = local.vpc_id
+  public_subnet_ids  = local.public_subnet_ids
+  private_subnet_ids = local.private_subnet_ids
   addl_alb_sg_ids    = [dependency.saf-tenant-security-groups.outputs.SafHTTPCommsSG_id]
   aws_region         = local.aws_region
   heimdall_alb_frontend_private = true
