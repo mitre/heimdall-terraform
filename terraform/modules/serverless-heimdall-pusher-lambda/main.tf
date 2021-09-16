@@ -15,7 +15,7 @@ terraform {
 # https://github.com/mitre/serverless-heimdall-pusher-lambda
 #
 module "serverless-heimdall-pusher-lambda" {
-  source = "git@github.com:mitre/serverless-heimdall-pusher-lambda"
+  source = "github.com/mitre/serverless-heimdall-pusher-lambda"
   heimdall_url      = var.heimdall_url
   heimdall_user     = var.heimdall_user
   heimdall_password = var.heimdall_password
