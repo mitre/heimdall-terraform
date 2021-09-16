@@ -9,6 +9,30 @@ terraform {
 }
 
 ##
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/region
+#
+data "aws_region" "current" {}
+
+##
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/data-sources/caller_identity
+#
+data "aws_caller_identity" "current" {}
+
+##
+# The KMS key used by serverless InSpec to access SSM Parameters and Other encrypted items
+#
+# https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/kms_key
+#
+resource "aws_kms_key" "inspec-kms-key" {
+  description             = "The KMS key used by serverless InSpec to access SSM Parameters and Other encrypted items"
+  deletion_window_in_days = 10
+
+  tags = {
+    Name = "inspec-kms-key"
+  }
+}
+
+##
 # InSpec Role to Invoke InSpec Lambda function 
 #
 # https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/iam_role
@@ -39,6 +63,77 @@ resource "aws_iam_role" "InSpecRole" {
       }
     ]
   })
+
+  # Allow logs:DescribeMetricFilters for aws:// profiles
+  inline_policy {
+    name = "LogsDescribeMetricFilters"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "logs:DescribeMetricFilters"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+  
+  # Allow iam:ListPolicies for CIS Baseline
+  inline_policy {
+    name = "IamListPoliciesAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "iam:ListPolicies"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow logs:DescribeMetricFilters for CIS Baseline
+  inline_policy {
+    name = "DescribeMetricFiltersAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "logs:DescribeMetricFilters"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow Policy and ACL access for CIS Baseline
+  # https://docs.chef.io/inspec/resources/aws_s3_bucket/#be_public
+  inline_policy {
+    name = "S3PolicyAndAclAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "s3:GetBucketPolicyStatus",
+            "s3:GetBucketAcl",
+            "s3:GetBucketPolicy"
+          ]
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
 
   # Allow S3 read access to InSpec profile bucket
   inline_policy {
@@ -76,45 +171,115 @@ resource "aws_iam_role" "InSpecRole" {
     })
   }
 
-  # Allow SSM access for starting sessions and SSM parameters
+  # Allow SSM DescribeInstanceInformation for awsssm:// transports
   inline_policy {
-    name = "SsmParamAndSessionAccess"
+    name = "SsmDescribeInstanceInformationAccess"
 
     policy = jsonencode({
       Version = "2012-10-17"
       Statement = [
         {
           Action = [
-            "ssm:GetParameter",
-            "ssm:StartSession"
+            "ssm:DescribeInstanceInformation"
           ]
           Effect   = "Allow"
-          Resource = "*" # consider locking this down to a GetParameter subpath
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow SSM SendCommand for awsssm:// transports
+  inline_policy {
+    name = "SsmSendCommandAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action = [
+            "ssm:SendCommand"
+          ]
+          Effect   = "Allow"
+          # Consider locking this down further to only instances that need to be scanned with awsssm://
+          Resource = [
+              "arn:aws-us-gov:ec2:*:${data.aws_caller_identity.current.account_id}:instance/*",
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunPowerShellScript",
+              "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunShellScript"
+          ]
+        }
+      ]
+    })
+  }
+
+  # Allow SSM SendCommand for awsssm:// transports
+  inline_policy {
+    name = "SsmGetCommandInvocationAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "ssm:GetCommandInvocation"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow SSM access for starting sessions 
+  inline_policy {
+    name = "SsmSessionAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "ssm:StartSession"
+          Effect   = "Allow"
+          Resource = "*"
+        }
+      ]
+    })
+  }
+
+  # Allow SSM parameters acccess for /inspec/*
+  inline_policy {
+    name = "SsmParamAccess"
+
+    policy = jsonencode({
+      Version = "2012-10-17"
+      Statement = [
+        {
+          Action   = "ssm:GetParameter"
+          Effect   = "Allow"
+          Resource = "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/inspec/*"
         }
       ]
     })
   }
 
   # Allow EC2 get password data for fetching WinRM credentials
-  inline_policy {
-    name = "EC2GetPasswordDataAccess"
+  # inline_policy {
+  #   name = "EC2GetPasswordDataAccess"
 
-    policy = jsonencode({
-      Version = "2012-10-17"
-      Statement = [
-        {
-          Action = [
-            "ec2:GetPasswordData"
-          ]
-          Effect   = "Allow"
-          Resource = "*" # consider locking this down to a specific groups of machines
-        }
-      ]
-    })
-  }
+  #   policy = jsonencode({
+  #     Version = "2012-10-17"
+  #     Statement = [
+  #       {
+  #         Action = [
+  #           "ec2:GetPasswordData"
+  #         ]
+  #         Effect   = "Allow"
+  #         Resource = "*" # consider locking this down to a specific groups of machines
+  #       }
+  #     ]
+  #   })
+  # }
 
   inline_policy {
-    name = "AllowHeimdallPassKmsKeyDecrypt"
+    name = "AllowInSpecKmsKeyDecrypt"
 
     policy = jsonencode({
       Version = "2012-10-17"
@@ -124,7 +289,7 @@ resource "aws_iam_role" "InSpecRole" {
             "kms:Decrypt"
           ]
           Effect   = "Allow"
-          Resource = "*" # consider locking this down to specific key(s)
+          Resource = aws_kms_key.inspec-kms-key.arn
         }
       ]
     })
@@ -137,9 +302,10 @@ resource "aws_iam_role" "InSpecRole" {
 # https://registry.terraform.io/modules/terraform-aws-modules/lambda/aws/latest
 #
 module "serverless-inspec-lambda" {
-  source = "git@github.com:mitre/serverless-inspec-lambda"
+  source = "github.com/mitre/serverless-inspec-lambda"
   subnet_ids      = var.subnet_ids
   security_groups = var.security_groups
   lambda_role_arn = aws_iam_role.InSpecRole.arn
   lambda_name     = "serverless-inspec-lambda-${var.deployment_id}"
+  image_version   = "0.15.7"
 }

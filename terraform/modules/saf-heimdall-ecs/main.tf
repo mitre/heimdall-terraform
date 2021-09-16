@@ -71,8 +71,8 @@ resource "aws_ecs_task_definition" "heimdall_task_definition" {
 
   tags = {
     Name    = "${var.proj_name}-heimdall-task-definition-${var.deployment_id}"
-    Owner   = var.your_name
-    Project = var.your_name
+    Owner   = basename(data.aws_caller_identity.current.arn)
+    Project = local.name
   }
   container_definitions = <<DEFINITION
 [
@@ -84,7 +84,7 @@ resource "aws_ecs_task_definition" "heimdall_task_definition" {
     "healthCheck": {
             "Command": [
                 "CMD-SHELL",
-                "wget -q --spider http://localhost/ || exit 1"
+                "wget -q --spider http://localhost:3000/login || exit 1"
             ],
             "Interval": 300,
             "Timeout": 60
