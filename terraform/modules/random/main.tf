@@ -4,9 +4,9 @@
 #
 # https://terragrunt.gruntwork.io/docs/features/keep-your-remote-state-configuration-dry/
 #
-terraform {
-  backend "s3" {}
-}
+#terraform {
+#  backend "s3" {}
+#}
 
 ##
 # Random String to Tag Deployment Resources

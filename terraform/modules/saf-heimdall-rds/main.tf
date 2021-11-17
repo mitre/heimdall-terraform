@@ -175,5 +175,5 @@ resource "aws_iam_role" "rds_cloudwatch_role" { #This is hard coded for us govcl
 }
 
 data "aws_iam_policy" "rds_enhanced_monitoring_policy" {
-  arn = "arn:aws-us-gov:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
+  arn = "arn:aws:iam::aws:policy/service-role/AmazonRDSEnhancedMonitoringRole"
 }

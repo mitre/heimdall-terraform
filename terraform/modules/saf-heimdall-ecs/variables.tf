@@ -84,13 +84,13 @@ variable "certificate_arn" {
 variable "AmazonECSTaskExecutionRolePolicy_arn" {
   description = "The ARN for the ECS task execution role policy. Change this from the default if working in non standard region (govcloud)"
   type        = string
-  default     = "arn:aws-us-gov:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+  default     = "arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
 }
 
 variable "AmazonRDSDataFullAccess_arn" {
   description = "The ARN for the RDS full access role policy. Change this from the default if working in non standard region (govcloud)"
   type        = string
-  default     = "arn:aws-us-gov:iam::aws:policy/AmazonRDSFullAccess"
+  default     = "arn:aws:iam::aws:policy/AmazonRDSFullAccess"
 }
 
 variable "aws_region" {

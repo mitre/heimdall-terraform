@@ -90,6 +90,7 @@ resource "aws_vpc_endpoint" "SsmMessagesVpcEndpoint" {
   tags = {
     Name = "SsmMessagesVpcEndpoint-${var.deployment_id}"
   }
+}
 
 ##
 # EC2 endpoint for use by train-awsssm

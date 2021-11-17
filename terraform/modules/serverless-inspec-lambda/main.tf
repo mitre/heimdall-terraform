@@ -46,7 +46,7 @@ resource "aws_iam_role" "InSpecRole" {
   managed_policy_arns = [
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
     "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole",
-    "arn:aws-us-gov:iam::aws:policy/service-role/AWSConfigRole"
+    "arn:aws:iam::aws:policy/service-role/AWSConfigRole"
   ]
 
   # Allow assume role permission for lambda
@@ -203,9 +203,9 @@ resource "aws_iam_role" "InSpecRole" {
           Effect   = "Allow"
           # Consider locking this down further to only instances that need to be scanned with awsssm://
           Resource = [
-              "arn:aws-us-gov:ec2:*:${data.aws_caller_identity.current.account_id}:instance/*",
-              "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunPowerShellScript",
-              "arn:aws-us-gov:ssm:${data.aws_region.current.name}::document/AWS-RunShellScript"
+              "arn:aws:ec2:*:${data.aws_caller_identity.current.account_id}:instance/*",
+              "arn:aws:ssm:${data.aws_region.current.name}::document/AWS-RunPowerShellScript",
+              "arn:aws:ssm:${data.aws_region.current.name}::document/AWS-RunShellScript"
           ]
         }
       ]
@@ -254,7 +254,7 @@ resource "aws_iam_role" "InSpecRole" {
         {
           Action   = "ssm:GetParameter"
           Effect   = "Allow"
-          Resource = "arn:aws-us-gov:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/inspec/*"
+          Resource = "arn:aws:ssm:${data.aws_region.current.name}:${data.aws_caller_identity.current.account_id}:parameter/inspec/*"
         }
       ]
     })

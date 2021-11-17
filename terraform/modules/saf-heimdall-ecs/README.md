@@ -35,8 +35,8 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_AmazonECSTaskExecutionRolePolicy_arn"></a> [AmazonECSTaskExecutionRolePolicy\_arn](#input\_AmazonECSTaskExecutionRolePolicy\_arn) | The ARN for the ECS task execution role policy. Change this from the default if working in non standard region (govcloud) | `string` | `"arn:aws-us-gov:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"` | no |
-| <a name="input_AmazonRDSDataFullAccess_arn"></a> [AmazonRDSDataFullAccess\_arn](#input\_AmazonRDSDataFullAccess\_arn) | The ARN for the RDS full access role policy. Change this from the default if working in non standard region (govcloud) | `string` | `"arn:aws-us-gov:iam::aws:policy/AmazonRDSFullAccess"` | no |
+| <a name="input_AmazonECSTaskExecutionRolePolicy_arn"></a> [AmazonECSTaskExecutionRolePolicy\_arn](#input\_AmazonECSTaskExecutionRolePolicy\_arn) | The ARN for the ECS task execution role policy. Change this from the default if working in non standard region (govcloud) | `string` | `"arn:aws:iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"` | no |
+| <a name="input_AmazonRDSDataFullAccess_arn"></a> [AmazonRDSDataFullAccess\_arn](#input\_AmazonRDSDataFullAccess\_arn) | The ARN for the RDS full access role policy. Change this from the default if working in non standard region (govcloud) | `string` | `"arn:aws:iam::aws:policy/AmazonRDSFullAccess"` | no |
 | <a name="input_DISABLE_SPRING"></a> [DISABLE\_SPRING](#input\_DISABLE\_SPRING) | Disable springboot in Heimdall deployment? Default false | `bool` | `false` | no |
 | <a name="input_HEIMDALL_RELATIVE_URL_ROOT"></a> [HEIMDALL\_RELATIVE\_URL\_ROOT](#input\_HEIMDALL\_RELATIVE\_URL\_ROOT) | Relative root url for heimdall deployment location. Default empty | `string` | `""` | no |
 | <a name="input_RAILS_ENV"></a> [RAILS\_ENV](#input\_RAILS\_ENV) | Environment tag for rails deployment. Default production | `string` | `"production"` | no |
