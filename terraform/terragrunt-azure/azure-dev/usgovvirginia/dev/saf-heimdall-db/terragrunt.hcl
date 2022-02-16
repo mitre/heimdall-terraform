@@ -33,7 +33,9 @@ dependency "saf-tenant-net" {
 
   mock_outputs = {
     vnet_id             = "temporary-dummy-id"
-    subnet_id = "temporary-dummy-private-subnet"
+    subnet_private_id = "temporary-dummy-private-subnet"
+    resource_group_name = ""
+    resource_group_location = ""
   }
 }
 
@@ -43,7 +45,7 @@ inputs = {
   deployment_id = dependency.random.outputs.deployment_id
   db_passworld = dependency.random.outputs.rds_password
   vnet_id        = dependency.saf-tenant-net.outputs.vnet_id
-  subnet_id                 = dependency.saf-tenant-net.outputs.subnet_id
+  subnet_id                 = dependency.saf-tenant-net.outputs.subnet_private_id
   resource_group_location    = dependency.saf-tenant-net.outputs.resource_group_location
   resource_group_name = dependency.saf-tenant-net.outputs.resource_group_name
 }

@@ -32,8 +32,10 @@ dependency "saf-tenant-net" {
   config_path = "../saf-tenant-net"
 
   mock_outputs = {
-    vpc_id             = "temporary-dummy-id"
-    subnet_id = "temporary-dummy-private-subnet"
+    vnet_id             = "temporary-dummy-id"
+    subnet_private_id = "temporary-dummy-private-subnet"
+    resource_group_location = ""
+    resource_group_name = ""
   }
 }
 
@@ -53,7 +55,7 @@ inputs = {
   #env                      = local.env
   deployment_id             = dependency.random.outputs.deployment_id
   vnet_id                   = dependency.saf-tenant-net.outputs.vnet_id
-  subnet_id                 = dependency.saf-tenant-net.outputs.subnet_id
+  subnet_id                 = dependency.saf-tenant-net.outputs.subnet_private_id
   resource_group_location   = dependency.saf-tenant-net.outputs.resource_group_location
   resource_group_name       = dependency.saf-tenant-net.outputs.resource_group_name
   deployment_id             = dependency.random.outputs.deployment_id

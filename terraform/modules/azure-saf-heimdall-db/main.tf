@@ -6,8 +6,8 @@
 #
 resource "azurerm_postgresql_server" "heimdall_db" {
   name                = "heimdall-db" #need to come back and not hard code this.. pull from variable
-  location            = "${var.resource_group_location}"
-  resource_group_name = "${var.resource_group_name}"
+  location            = var.resource_group_location
+  resource_group_name = var.resource_group_name
 
   administrator_login          = "postgres"
   administrator_login_password = "Password123" #"${var.db_password}"
