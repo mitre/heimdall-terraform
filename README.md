@@ -1,4 +1,4 @@
-# NNC AWS SAF
+# Heimdall-Terraform
 
 This repository is meant to implement [SAF](https://saf.mitre.org/#/) within AWS.
 
